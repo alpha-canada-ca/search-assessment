@@ -1,0 +1,33 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 3001
+      idleTimeout: 1000 seconds
+
+logging:
+  level: INFO
+
+airtableServer:
+  protocol: https
+  host: api.airtable.com
+  port: 443
+  #token: patC8iLV9c3Wgtbrh.f88392a779f979e624a55a1d479e5492b07e68c66f189e8a7a121b1ce8f97816
+  token: patmufRxHetPY3l2d.37cd144946b7b3d919273c52e53d76c79176d830444d9f69bfea3e7b4118d792
+  #termsBaseId: appkHWhfSDcFdJAA2
+  #archiveBaseId: appmVstr4GT4g7roP
+  termsBaseId: appbVw1fwzUCMa0Vh
+  archiveBaseId: appfJD8VSNmCf19Tg
+
+httpClient:
+  timeout: 5000ms
+  connectionTimeout: 5000ms
+  timeToLive: 1 hour
+  cookiesEnabled: false
+  maxConnections: 1024
+  maxConnectionsPerRoute: 1024
+  keepAlive: 0s
+
+searchPage:
+  globalEn: https://www.canada.ca/en/sr/srb.html
+  globalFr: https://www.canada.ca/fr/sr/srb.html
+  google: https://www.google.ca/search
