@@ -370,7 +370,9 @@ public class QueryResource {
 							term.put("passingUrlMetadata", getMetadata(lp, te.getTargetUrlMetadata()));
 							terms.add(term);
 						}
-						allTerms.put(st.toString().toLowerCase(), terms);
+						if (st != SearchType.GOOGLE || googlePasses > 0) {
+							allTerms.put(st.toString().toLowerCase(), terms);
+						}
 					}
 
 				}
