@@ -1,10 +1,6 @@
 package ca.canada.digital.search.assessment.process;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.HashMap;
-import java.util.Map;
-
+import ca.canada.digital.search.assessment.object.Language;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.LowerCaseFilter;
@@ -16,135 +12,138 @@ import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ca.canada.digital.search.assessment.object.Language;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.Map;
 
 public class LanguageProcess {
-	private static Logger LOG = LoggerFactory.getLogger(LanguageProcess.class);
-	private static final String TAG_START = "<em>";
-	private static final String TAG_END = "</em>";
-	private Language lang;
-	private Analyzer analyzer;
-	private TokenStream ts;
-	private String processedTerm;
+    private static final String TAG_START = "<em>";
+    private static final String TAG_END = "</em>";
+    private static Logger LOG = LoggerFactory.getLogger(LanguageProcess.class);
+    private Language lang;
+    private Analyzer analyzer;
+    private TokenStream ts;
+    private String processedTerm;
 
-	public LanguageProcess(String term, Language lang) {
-		this.lang = lang;
-		this.analyzer = new StandardAnalyzer();
-		this.processedTerm = applyFilters(term, lang);
-	}
+    public LanguageProcess(String term, Language lang) {
+        this.lang = lang;
+        this.analyzer = new StandardAnalyzer();
+        this.processedTerm = applyFilters(term, lang);
+    }
 
-	private String applyFilters(String term, Language lang) {
-		ts = this.analyzer.tokenStream("term", new StringReader(term));
-		ts = new LowerCaseFilter(ts);
-		if (Language.FRENCH == lang) {
-			ts = new FrenchLightStemFilter(ts);
-		} else {
-			ts = new PorterStemFilter(ts);
-		}
+    private String applyFilters(String term, Language lang) {
+        ts = this.analyzer.tokenStream("term", new StringReader(term));
+        ts = new LowerCaseFilter(ts);
+        if (Language.FRENCH == lang) {
+            ts = new FrenchLightStemFilter(ts);
+        } else {
+            ts = new PorterStemFilter(ts);
+        }
 
-		try {
+        try {
 
-			CharTermAttribute token = ts.getAttribute(CharTermAttribute.class);
+            CharTermAttribute token = ts.getAttribute(CharTermAttribute.class);
 
-			ts.reset();
+            ts.reset();
 
-			StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder stringBuilder = new StringBuilder();
 
-			while (ts.incrementToken()) {
-				if (stringBuilder.length() > 0) {
-					stringBuilder.append(" ");
-				}
+            while (ts.incrementToken()) {
+                if (stringBuilder.length() > 0) {
+                    stringBuilder.append(" ");
+                }
 
-				stringBuilder.append(token.toString());
-			}
+                stringBuilder.append(token.toString());
+            }
 
-			ts.end();
-			ts.close();
+            ts.end();
+            ts.close();
 
-			return stringBuilder.toString();
+            return stringBuilder.toString();
 
-		} catch (IOException e) {
-			LOG.error("Error while tokenizing the terms: ", e);
-		}
+        } catch (IOException e) {
+            LOG.error("Error while tokenizing the terms: ", e);
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public Map<String, Object> getMatches(String text) {
-		Map<String, Object> result = new HashMap<>();
-		String[] processedTerms = processedTerm.split("\\s+");
-		
-		if (StringUtils.isEmpty(text)) {
-			Map<String, Object> terms = new HashMap<>();
-			for (String term : processedTerms) {
-				terms.put(term, 0);
-			}
-			result.put("matches", terms);
-			result.put("matchingScore", 0);
-			return result;
-		}
+    public Map<String, Object> getMatches(String text) {
+        Map<String, Object> result = new HashMap<>();
+        String[] processedTerms = processedTerm.split("\\s+");
 
-		String[] processedText = applyFilters(text, lang).split("\\s+");
+        if (StringUtils.isEmpty(text)) {
+            Map<String, Object> terms = new HashMap<>();
+            for (String term : processedTerms) {
+                terms.put(term, 0);
+            }
+            result.put("matches", terms);
+            result.put("matchingScore", 0);
+            return result;
+        }
 
-		Map<String, Integer> matchesMap = new HashMap<>();
-		int zeros = 0;
+        String[] processedText = applyFilters(text, lang).split("\\s+");
 
-		for (String termToken : processedTerms) {
-			int matches = 0;
-			for (String textToken : processedText) {
-				if (termToken.equalsIgnoreCase(textToken)) {
-					matches++;
-				}
-			}
-			if (matches == 0) {
-				zeros = zeros + 1;
-			}
-			matchesMap.put(termToken, matches);
-		}
-		result.put("matches", matchesMap);
+        Map<String, Integer> matchesMap = new HashMap<>();
+        int zeros = 0;
 
-		int score = 2; // all marched
-		if (zeros > 0) {
-			if (zeros < matchesMap.size()) {
-				score = 1; // some matched
-			} else if (zeros == matchesMap.size()) {
-				score = 0; // no matches
-			}
-		}
-		result.put("matchingScore", score);
+        for (String termToken : processedTerms) {
+            int matches = 0;
+            for (String textToken : processedText) {
+                if (termToken.equalsIgnoreCase(textToken)) {
+                    matches++;
+                }
+            }
+            if (matches == 0) {
+                zeros = zeros + 1;
+            }
+            matchesMap.put(termToken, matches);
+        }
+        result.put("matches", matchesMap);
 
-		return result;
+        int score = 2; // all marched
+        if (zeros > 0) {
+            if (zeros < matchesMap.size()) {
+                score = 1; // some matched
+            } else if (zeros == matchesMap.size()) {
+                score = 0; // no matches
+            }
+        }
+        result.put("matchingScore", score);
 
-	}
+        return result;
 
-	public String getHighlights(String text) {
-		if (StringUtils.isEmpty(text)) {
-			return null;
-		}
+    }
 
-		String[] processedTerms = processedTerm.split("\\s+");
-		String[] words = text.strip().toLowerCase().split("\\s+");
+    public String getHighlights(String text) {
+        if (StringUtils.isEmpty(text)) {
+            return null;
+        }
 
-		for (String termToken : processedTerms) {
-			for (int i = 0; i < words.length; i++) {
-				String token = words[i].replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
-				if (token.equalsIgnoreCase(termToken)) {
-					words[i] = tag(words[i]);
-				} else if (termToken.length() > 2 && token.startsWith(termToken)) {
-					words[i] = tag(words[i]);
-				}
-			}
-		}
-		return String.join(" ", words);
+        String[] processedTerms = processedTerm.split("\\s+");
+        String[] words = text.strip().toLowerCase().split("\\s+");
 
-	}
+        for (String termToken : processedTerms) {
+            for (int i = 0; i < words.length; i++) {
+                String token = words[i].replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+                if (token.equalsIgnoreCase(termToken)) {
+                    words[i] = tag(words[i]);
+                } else if (termToken.length() > 2 && token.startsWith(termToken)) {
+                    words[i] = tag(words[i]);
+                }
+            }
+        }
+        return String.join(" ", words);
 
-	private String tag(String text) {
-		return String.format("%s%s%s", TAG_START, text.strip(), TAG_END);
-	}
+    }
 
-	public String getProcessedTerm() {
-		return processedTerm;
-	}
+    private String tag(String text) {
+        return String.format("%s%s%s", TAG_START, text.strip(), TAG_END);
+    }
+
+    public String getProcessedTerm() {
+        return processedTerm;
+    }
 
 }
