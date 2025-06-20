@@ -32,14 +32,14 @@ public class TermEvaluationProcess {
     private static final String GOOGLE_URL_PATTERN = "^(https:\\/\\/www.google.\\w{2,3}?\\/url?.*q=)?(http.*)(&|\\?)sa.*$";
     private static final String GOOGLE_XPATH = "//*[@id=\"main\"]/div/div/div[1]/a";
     private static final String CANADA_CSS_PATH = "section h3 > a";
-    private static Logger LOG = LoggerFactory.getLogger(TermEvaluationProcess.class);
+    private static final Logger LOG = LoggerFactory.getLogger(TermEvaluationProcess.class);
+    private final List<SearchTerm> searchTerms;
+    private final Department department;
+    private final SearchType type;
+    private final Language lang;
+    private final List<SearchResult> searchResults = new ArrayList<>();
     WebDriver driver = null;
-    private List<SearchTerm> searchTerms;
     private List<TermEvaluation> evaluatedTerms;
-    private Department department;
-    private SearchType type;
-    private Language lang;
-    private List<SearchResult> searchResults = new ArrayList<>();
 
 
     public TermEvaluationProcess(List<SearchTerm> searchTerms, Department department, SearchType type, Language lang, WebDriver driver) {
@@ -100,7 +100,6 @@ public class TermEvaluationProcess {
                     te.setPassUrlPosition(i + 1);
                     if (i < NUM_OF_FIRST_RESULTS_TO_PASS) {
                         te.setPass(true);
-                        ;
                     }
                     break;
                 }

@@ -5,9 +5,9 @@ public enum SearchType {
     CONTEXTUAL("Contextual"),
     GOOGLE("Google");
 
-    private String name;
+    private final String name;
 
-    private SearchType(String name) {
+    SearchType(String name) {
         this.name = name;
     }
 

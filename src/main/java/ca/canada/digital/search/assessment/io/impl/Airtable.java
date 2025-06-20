@@ -83,11 +83,11 @@ public class Airtable implements DataTable {
     private static final String DEPARTMENT_SEARCH_URL_EN = "Contextual Search Page - English";
     private static final String DEPARTMENT_SEARCH_URL_FR = "Contextual Search Page - French";
 
-    private HttpClient httpClient;
-    private Language lang;
-    private String serverUrl;
-    private SearchType type;
-    private String authHeader = "Bearer " + AssessmentApplication.getConfig().getAirtableServer().getToken();
+    private final HttpClient httpClient;
+    private final Language lang;
+    private final String serverUrl;
+    private final SearchType type;
+    private final String authHeader = "Bearer " + AssessmentApplication.getConfig().getAirtableServer().getToken();
 
     public Airtable(HttpClient httpClient, SearchType type, Language lang) {
         this.httpClient = httpClient;
@@ -414,7 +414,7 @@ public class Airtable implements DataTable {
             } else {
                 uriBuilder.addParameter(FILTER_PARAM,
                         String.format("AND(IS_SAME({%s},\"%s\"),REGEX_MATCH({%s},\"^%s$\"))", DATE_FIELD,
-                                DateUtil.dateToString(date), SOURCE_FIELD, SearchType.GLOBAL.toString()));
+                                DateUtil.dateToString(date), SOURCE_FIELD, SearchType.GLOBAL));
             }
 
             URI uri = uriBuilder.build();
@@ -429,11 +429,7 @@ public class Airtable implements DataTable {
 
                 if (!results.isEmpty() && results.has(RESULTS_SET) && !results.getJSONArray(RESULTS_SET).isEmpty()) {
                     JSONArray records = results.getJSONArray(RESULTS_SET);
-                    if (records != null && !records.isEmpty()) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return records != null && !records.isEmpty();
                 }
             } else {
                 LOG.error("Airtable Error: {}", EntityUtils.toString(httpResponse.getEntity(), ENCODING));
@@ -567,9 +563,7 @@ public class Airtable implements DataTable {
             if (!done) {
                 post.setEntity(new StringEntity(new JSONObject().put(RESULTS_SET, records).toString(), ENCODING));
                 ClassicHttpResponse httpResponse = (ClassicHttpResponse) httpClient.execute(post);
-                if (httpResponse.getCode() == HttpStatus.SC_OK) {
-                    return false;
-                }
+                return httpResponse.getCode() != HttpStatus.SC_OK;
             }
 
             return true;
@@ -852,11 +846,7 @@ public class Airtable implements DataTable {
 
                 if (!results.isEmpty() && results.has(RESULTS_SET) && !results.getJSONArray(RESULTS_SET).isEmpty()) {
                     JSONArray records = results.getJSONArray(RESULTS_SET);
-                    if (records != null && !records.isEmpty()) {
-                        return true;
-                    } else {
-                        return false;
-                    }
+                    return records != null && !records.isEmpty();
                 }
             } else {
                 LOG.error("Airtable Error: {}", EntityUtils.toString(httpResponse.getEntity(), ENCODING));

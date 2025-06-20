@@ -13,9 +13,9 @@ public enum CsvHeader {
     TYPE("Search Type");
 
 
-    private String header;
+    private final String header;
 
-    private CsvHeader(String header) {
+    CsvHeader(String header) {
         this.header = header;
     }
 

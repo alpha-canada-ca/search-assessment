@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Entity
 @Table(name = "user_session",
@@ -20,7 +21,8 @@ public class UserSession implements Serializable {
 
     @Column(name = "session_token",
             nullable = false,
-            length = 255,
+            length = 36,
+            columnDefinition = "CHAR(36)",
             unique = true)
     private String sessionToken;
 
@@ -46,6 +48,20 @@ public class UserSession implements Serializable {
 
     @Column(name = "user_agent", length = 512)
     private String userAgent;
+
+    public UserSession(UserEntity user, LocalDateTime expiresAt, String ipAddress, String userAgent) {
+        this.sessionToken = UUID.randomUUID().toString();
+        this.user = user;
+        this.createdAt = LocalDateTime.now();
+        this.lastAccessed = this.createdAt;
+        this.expiresAt = expiresAt;
+        this.ipAddress = ipAddress;
+        this.userAgent = userAgent;
+    }
+
+    public UserSession() {
+
+    }
 
     public Integer getId() {
         return id;

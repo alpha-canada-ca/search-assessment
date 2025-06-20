@@ -1,15 +1,17 @@
 package ca.canada.digital.search.assessment.model;
 
 import jakarta.persistence.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.Serializable;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "user_entity",
         uniqueConstraints = @UniqueConstraint(columnNames = "email"))
-public class UserEntity implements Serializable {
+public class UserEntity implements Serializable, Principal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,14 +54,6 @@ public class UserEntity implements Serializable {
         this.id = id;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -84,8 +78,8 @@ public class UserEntity implements Serializable {
         this.lastName = lastName;
     }
 
-    public Boolean getAdmin() {
-        return admin;
+    public Boolean isAdmin() {
+        return Boolean.TRUE.equals(admin);
     }
 
     public void setAdmin(Boolean admin) {
@@ -122,5 +116,34 @@ public class UserEntity implements Serializable {
 
     public void setTerms(List<Term> terms) {
         this.terms = terms;
+    }
+
+    // --- Password encryption ---
+
+    /**
+     * Set and hash the user's password using BCrypt.
+     *
+     * @param plainPassword the plaintext password to hash
+     */
+    public void setPassword(String plainPassword) {
+        this.password = BCrypt.hashpw(plainPassword, BCrypt.gensalt());
+    }
+
+    /**
+     * Check a plaintext password against the stored hash.
+     *
+     * @param plainPassword the plaintext password to verify
+     * @return true if the password matches, false otherwise
+     */
+    public boolean checkPassword(String plainPassword) {
+        if (this.password == null) {
+            return false;
+        }
+        return BCrypt.checkpw(plainPassword, this.password);
+    }
+
+    @Override
+    public String getName() {
+        return email;
     }
 }

@@ -1,4 +1,4 @@
-package ca.canada.digital.search.assessment.service;
+package ca.canada.digital.search.assessment.resource;
 
 import ca.canada.digital.search.assessment.io.impl.Airtable;
 import ca.canada.digital.search.assessment.object.*;
@@ -41,8 +41,8 @@ public class LegacyAssessmentResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(LegacyAssessmentResource.class);
 
-    private HttpClient httpClient;
-    private ThreadPoolExecutor threadPool = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+    private final HttpClient httpClient;
+    private final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
             new LinkedBlockingQueue<Runnable>());
 
     public LegacyAssessmentResource(HttpClient httpClient) {
@@ -769,7 +769,7 @@ public class LegacyAssessmentResource {
     private enum SeleniumDriver {
         INSTANCE;
 
-        private SeleniumDriver() {
+        SeleniumDriver() {
         }
 
         public WebDriver getDriver() {

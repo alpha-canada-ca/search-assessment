@@ -17,7 +17,6 @@ public class DateUtil {
             return new SimpleDateFormat(DATE_FORMAT).parse(dateString);
         } catch (ParseException e) {
             LOG.error("The date provided is invalid.", e);
-            ;
         }
         return null;
     }

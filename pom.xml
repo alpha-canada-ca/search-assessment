@@ -9,13 +9,15 @@
     <properties>
         <dropwizard.version>4.0.14</dropwizard.version>
         <json.version>20250517</json.version>
-        <junit.version>4.13.2</junit.version>
+        <junit.version>5.10.0</junit.version>
         <jetty.version>12.0.22</jetty.version>
         <csv.version>1.14.0</csv.version>
         <selenium.version>4.33.0</selenium.version>
         <swagger.version>4.0.5-1</swagger.version>
         <jsoup.version>1.20.1</jsoup.version>
         <lucene.version>10.2.1</lucene.version>
+        <mysql.version>8.0.33</mysql.version>
+        <jbcrypt.version>0.4</jbcrypt.version>
     </properties>
 
     <pluginRepositories>
@@ -82,6 +84,12 @@
             <artifactId>dropwizard-client</artifactId>
         </dependency>
 
+        <!-- For Auth and OAuth -->
+        <dependency>
+            <groupId>io.dropwizard</groupId>
+            <artifactId>dropwizard-auth</artifactId>
+        </dependency>
+
         <!-- For JSON -->
         <dependency>
             <groupId>org.json</groupId>
@@ -91,8 +99,8 @@
 
         <!-- For JUnit -->
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
@@ -102,13 +110,6 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-csv</artifactId>
             <version>${csv.version}</version>
-        </dependency>
-
-        <!-- For Jetty -->
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-http</artifactId>
-            <version>${jetty.version}</version>
         </dependency>
 
         <!-- For Selenium -->
@@ -144,6 +145,21 @@
             <artifactId>jsoup</artifactId>
             <version>${jsoup.version}</version>
         </dependency>
+
+        <!-- For MySQL -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>${mysql.version}</version>
+        </dependency>
+
+        <!-- For JBCrypt -->
+        <dependency>
+            <groupId>org.mindrot</groupId>
+            <artifactId>jbcrypt</artifactId>
+            <version>${jbcrypt.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>

@@ -16,16 +16,40 @@ public class UserEntityDao extends AbstractDAO<UserEntity> {
         super(factory);
     }
 
-    public Optional<UserEntity> findById(Long id) {
-        return Optional.ofNullable(get(id));
-    }
-
-    public List<UserEntity> findAll() {
+    public List<UserEntity> findAll(int offset, int limit) {
         Session session = currentSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<UserEntity> cq = cb.createQuery(UserEntity.class);
         Root<UserEntity> root = cq.from(UserEntity.class);
         cq.select(root);
+
+        return list(
+                session.createQuery(cq).setFirstResult(offset)
+                        .setMaxResults(limit)
+        );
+    }
+
+    public Optional<UserEntity> findById(Integer id) {
+        return Optional.ofNullable(get(id));
+    }
+
+    public Optional<UserEntity> findByEmail(String email) {
+        Session session = currentSession();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> cq = cb.createQuery(UserEntity.class);
+        Root<UserEntity> root = cq.from(UserEntity.class);
+        cq.select(root).where(cb.equal(root.get("email"), email));
+        List<UserEntity> results = list(session.createQuery(cq));
+        return results.stream().findFirst();
+    }
+
+    public List<UserEntity> findByDepartment(Integer departmentId) {
+        Session session = currentSession();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<UserEntity> cq = cb.createQuery(UserEntity.class);
+        Root<UserEntity> root = cq.from(UserEntity.class);
+        cq.select(root)
+                .where(cb.equal(root.get("department").get("id"), departmentId));
         return list(session.createQuery(cq));
     }
 

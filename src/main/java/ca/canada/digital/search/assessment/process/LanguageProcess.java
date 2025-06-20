@@ -20,11 +20,11 @@ import java.util.Map;
 public class LanguageProcess {
     private static final String TAG_START = "<em>";
     private static final String TAG_END = "</em>";
-    private static Logger LOG = LoggerFactory.getLogger(LanguageProcess.class);
-    private Language lang;
-    private Analyzer analyzer;
+    private static final Logger LOG = LoggerFactory.getLogger(LanguageProcess.class);
+    private final Language lang;
+    private final Analyzer analyzer;
+    private final String processedTerm;
     private TokenStream ts;
-    private String processedTerm;
 
     public LanguageProcess(String term, Language lang) {
         this.lang = lang;

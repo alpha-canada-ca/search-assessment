@@ -14,9 +14,9 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 
 public class MetadataProcess {
-    private static Logger LOG = LoggerFactory.getLogger(MetadataProcess.class);
-    private Metadata metadata;
-    private URI uri;
+    private static final Logger LOG = LoggerFactory.getLogger(MetadataProcess.class);
+    private final Metadata metadata;
+    private final URI uri;
 
     public MetadataProcess(URI uri) {
         this.uri = uri;
@@ -56,7 +56,7 @@ public class MetadataProcess {
                 metadata.setTitle(doc.title());
 
             } else {
-                LOG.warn("Could be an empty page or a network issue. Invistigate: {}", uri.toString());
+                LOG.warn("Could be an empty page or a network issue. Invistigate: {}", uri);
             }
 
         } catch (Exception e) {

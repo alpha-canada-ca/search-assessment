@@ -16,17 +16,21 @@ public class DepartmentDao extends AbstractDAO<Department> {
         super(factory);
     }
 
-    public Optional<Department> findById(Long id) {
+    public Optional<Department> findById(Integer id) {
         return Optional.ofNullable(get(id));
     }
 
-    public List<Department> findAll() {
+    public List<Department> findAll(int offset, int limit) {
         Session session = currentSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Department> cq = cb.createQuery(Department.class);
         Root<Department> root = cq.from(Department.class);
         cq.select(root);
-        return list(session.createQuery(cq));
+
+        return list(
+                session.createQuery(cq).setFirstResult(offset)
+                        .setMaxResults(limit)
+        );
     }
 
     public Department save(Department department) {

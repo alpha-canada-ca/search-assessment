@@ -4,9 +4,9 @@ public enum Format {
     JSON("json"),
     CSV("csv");
 
-    private String format;
+    private final String format;
 
-    private Format(String format) {
+    Format(String format) {
         this.format = format;
     }
 

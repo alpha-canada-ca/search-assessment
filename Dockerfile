@@ -1,4 +1,4 @@
-FROM openjdk:11-jre-slim
+FROM openjdk:17-jdk-slim
 
 ARG GECKODRIVER_VERSION=0.34.0
 

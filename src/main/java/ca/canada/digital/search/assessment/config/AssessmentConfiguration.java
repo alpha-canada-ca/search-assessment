@@ -12,8 +12,8 @@ import jakarta.validation.constraints.NotNull;
  */
 public class AssessmentConfiguration extends Configuration {
 
-    private AirtableServer airtableServer = new AirtableServer();
-    private SearchPage searchPage = new SearchPage();
+    private final AirtableServer airtableServer = new AirtableServer();
+    private final SearchPage searchPage = new SearchPage();
     @Valid
     @NotNull
     private HttpClientConfiguration httpClient = new HttpClientConfiguration();
