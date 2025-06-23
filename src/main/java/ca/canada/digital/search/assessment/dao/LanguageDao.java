@@ -16,7 +16,7 @@ public class LanguageDao extends AbstractDAO<Language> {
         super(factory);
     }
 
-    public Optional<Language> findById(Long id) {
+    public Optional<Language> findById(Integer id) {
         return Optional.ofNullable(get(id));
     }
 

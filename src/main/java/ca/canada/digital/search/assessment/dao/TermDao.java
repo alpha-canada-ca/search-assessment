@@ -20,6 +20,16 @@ public class TermDao extends AbstractDAO<Term> {
         return Optional.ofNullable(get(id));
     }
 
+    public List<Term> findByTermList(Integer listId) {
+        Session session = currentSession();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+        CriteriaQuery<Term> cq = cb.createQuery(Term.class);
+        Root<Term> root = cq.from(Term.class);
+        cq.select(root)
+                .where(cb.equal(root.get("termList").get("id"), listId));
+        return list(session.createQuery(cq));
+    }
+
     public List<Term> findAll() {
         Session session = currentSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();

@@ -16,7 +16,7 @@ public class TermListDao extends AbstractDAO<TermList> {
         super(factory);
     }
 
-    public Optional<TermList> findById(Long id) {
+    public Optional<TermList> findById(Integer id) {
         return Optional.ofNullable(get(id));
     }
 
