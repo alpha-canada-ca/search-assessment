@@ -122,7 +122,12 @@ public class AssessmentService {
                 .count();
         List<TermAssessment> internalTerms = assessment.getTermAssessments().stream()
                 .filter(term -> term.getSearchType() == TermAssessment.SearchType.INTERNAL)
-                .sorted(Comparator.comparingInt(TermAssessment::getSequence))
+                .sorted(
+                        Comparator.comparing(
+                                TermAssessment::getSequence,
+                                Comparator.nullsLast(Comparator.naturalOrder())
+                        ).thenComparing(TermAssessment::getId)
+                )
                 .collect(Collectors.toList());
 
 
@@ -133,22 +138,30 @@ public class AssessmentService {
         assessmentResponse.setHasSpecificSearch(hasSpecificSearch);
         assessmentResponse.setInternalUrl(
                 "fr".equalsIgnoreCase(lang.getCode()) ? config.getSearchPage().getGlobalFr() : config.getSearchPage().getGlobalEn());
-        assessmentResponse.setInternalScore((internalPasses > 0) ? (String.format("%.01f", (internalPasses / count) * 100) + "%") : "0%");
+        assessmentResponse.setInternalScore((internalPasses <= 0) ? "0%" : (String.format("%d%%", (internalPasses / count) * 100)));
         assessmentResponse.setInternalTerms(internalTerms);
         if (hasSpecificSearch) {
-            assessmentResponse.setInternalSpecificScore(internalSpecificPasses > 0 ? String.format("%.01f", (internalSpecificPasses / count) * 100) + "%" : "0%");
+            assessmentResponse.setInternalSpecificScore(internalSpecificPasses > 0 ? String.format("%d%%", (internalSpecificPasses / count) * 100) : "0%");
             assessmentResponse.setInternalSpecificTerms(assessment.getTermAssessments().stream()
                     .filter(term -> term.getSearchType() == TermAssessment.SearchType.INTERNAL_SPECIFIC)
-                    .sorted(Comparator.comparingInt(TermAssessment::getSequence))
-                    .collect(Collectors.toList()));
+                    .sorted(
+                            Comparator.comparing(
+                                    TermAssessment::getSequence,
+                                    Comparator.nullsLast(Comparator.naturalOrder())
+                            ).thenComparing(TermAssessment::getId)
+                    )                    .collect(Collectors.toList()));
         }
         if (hasGoogleSearch) {
             assessmentResponse.setGoogleUrl(config.getSearchPage().getGoogle());
-            assessmentResponse.setGoogleScore(googlePasses > 0 ? String.format("%.01f", (googlePasses / count) * 100) + "%" : "0%");
+            assessmentResponse.setGoogleScore(googlePasses > 0 ? String.format("%d%%", (googlePasses / count) * 100) : "0%");
             assessmentResponse.setGoogleTerms(assessment.getTermAssessments().stream()
                     .filter(term -> term.getSearchType() == TermAssessment.SearchType.GOOGLE)
-                    .sorted(Comparator.comparingInt(TermAssessment::getSequence))
-                    .collect(Collectors.toList()));
+                    .sorted(
+                            Comparator.comparing(
+                                    TermAssessment::getSequence,
+                                    Comparator.nullsLast(Comparator.naturalOrder())
+                            ).thenComparing(TermAssessment::getId)
+                    )                    .collect(Collectors.toList()));
         }
         LanguageProcess lp;
         List<MetadataHighlight> metadataHighlights = new ArrayList<>();

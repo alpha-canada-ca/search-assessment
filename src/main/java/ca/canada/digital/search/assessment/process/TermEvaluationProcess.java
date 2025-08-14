@@ -56,7 +56,10 @@ public class TermEvaluationProcess {
         try {
             // Fetch the all search pages and get the top search results
             for (TermAssessment.SearchType type : TermAssessment.SearchType.values()) {
-                fetchSearchResults(type);
+                if (type != TermAssessment.SearchType.INTERNAL_SPECIFIC ||
+                        (!StringUtils.isEmpty(department.getSearchUrlEn()) && !StringUtils.isEmpty(department.getSearchUrlFr()))) {
+                    fetchSearchResults(type);
+                }
             }
             // Evaluate the top NUM_OF_FIRST_URLS_TO_TEST URLs
             evaluateSearchResults();

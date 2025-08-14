@@ -42,6 +42,7 @@ public class TermAssessment implements Serializable {
     private String targetUrl;
 
     @OneToOne(mappedBy = "termAssessment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private Metadata metadata;
 
     public Integer getId() {

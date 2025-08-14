@@ -49,14 +49,19 @@ public class TermAssessmentService {
 
         List<TermAssessment> internalTerms = termAssessments.stream()
                 .filter(term -> term.getSearchType() == TermAssessment.SearchType.INTERNAL)
-                .sorted(Comparator.comparingInt(TermAssessment::getSequence))
+                .sorted(
+                        Comparator.comparing(
+                                TermAssessment::getSequence,
+                                Comparator.nullsLast(Comparator.naturalOrder())
+                        ).thenComparing(TermAssessment::getId)
+                )
                 .collect(Collectors.toList());
 
 
         UrlAssessmentResponse urlAssessmentResponse = new UrlAssessmentResponse();
         urlAssessmentResponse.setUrl(url);
         if (internalCount > 0) {
-            urlAssessmentResponse.setInternalScore(internalPasses > 0 ? String.format("%.01f", (internalPasses / internalCount) * 100) + "%" : "0%");
+            urlAssessmentResponse.setInternalScore(internalPasses > 0 ? String.format("%d%%", (internalPasses / internalCount) * 100) : "0%");
             urlAssessmentResponse.setInternalTerms(internalTerms);
 
             LanguageProcess lp;
@@ -68,17 +73,27 @@ public class TermAssessmentService {
             urlAssessmentResponse.setHighlightedMetadata(metadataHighlights);
         }
         if (internalSpecificCount > 0) {
-            urlAssessmentResponse.setInternalSpecificScore(internalSpecificPasses > 0 ? String.format("%.01f", (internalSpecificPasses / internalSpecificCount) * 100) + "%" : "0%");
+            urlAssessmentResponse.setInternalSpecificScore(internalSpecificPasses > 0 ? String.format("%d%%", (internalSpecificPasses / internalSpecificCount) * 100) : "0%");
             urlAssessmentResponse.setInternalSpecificTerms(termAssessments.stream()
                     .filter(term -> term.getSearchType() == TermAssessment.SearchType.INTERNAL_SPECIFIC)
-                    .sorted(Comparator.comparingInt(TermAssessment::getSequence))
+                    .sorted(
+                            Comparator.comparing(
+                                    TermAssessment::getSequence,
+                                    Comparator.nullsLast(Comparator.naturalOrder())
+                            ).thenComparing(TermAssessment::getId)
+                    )
                     .collect(Collectors.toList()));
         }
         if (googleCount > 0) {
-            urlAssessmentResponse.setGoogleScore(googlePasses > 0 ? String.format("%.01f", (googlePasses / googleCount) * 100) + "%" : "0%");
+            urlAssessmentResponse.setGoogleScore(googlePasses > 0 ? String.format("%d%%", (googlePasses / googleCount) * 100) : "0%");
             urlAssessmentResponse.setGoogleTerms(termAssessments.stream()
                     .filter(term -> term.getSearchType() == TermAssessment.SearchType.GOOGLE)
-                    .sorted(Comparator.comparingInt(TermAssessment::getSequence))
+                    .sorted(
+                            Comparator.comparing(
+                                    TermAssessment::getSequence,
+                                    Comparator.nullsLast(Comparator.naturalOrder())
+                            ).thenComparing(TermAssessment::getId)
+                    )
                     .collect(Collectors.toList()));
         }
 

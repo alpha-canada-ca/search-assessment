@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 public class DateUtil {
@@ -26,7 +27,9 @@ public class DateUtil {
         if (date == null) {
             return null;
         }
-        return new SimpleDateFormat(DATE_FORMAT).format(date);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+
+        return date.format(formatter);
     }
 
 }
