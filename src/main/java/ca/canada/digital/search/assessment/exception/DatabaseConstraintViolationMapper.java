@@ -24,7 +24,10 @@ public class DatabaseConstraintViolationMapper implements ExceptionMapper<Constr
 
     public static class ErrorMessage {
         public final String message;
-        public ErrorMessage(String message) { this.message = message; }
+
+        public ErrorMessage(String message) {
+            this.message = message;
+        }
     }
 }
 

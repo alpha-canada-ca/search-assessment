@@ -15,7 +15,8 @@ import java.util.stream.Collectors;
 public class TermAssessmentService {
 
     private TermAssessmentDao termAssessmentDao;
-    public TermAssessmentService (TermAssessmentDao termAssessmentDao) {
+
+    public TermAssessmentService(TermAssessmentDao termAssessmentDao) {
         this.termAssessmentDao = termAssessmentDao;
     }
 

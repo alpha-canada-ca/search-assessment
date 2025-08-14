@@ -11,19 +11,19 @@ import jakarta.ws.rs.NotFoundException;
 import java.util.List;
 
 public class DepartmentService {
-    private final DepartmentDao    departmentDao;
+    private final DepartmentDao departmentDao;
     private final UserEntityDao userDao;
 
     public DepartmentService(DepartmentDao departmentDao,
                              UserEntityDao userDao) {
         this.departmentDao = departmentDao;
-        this.userDao       = userDao;
+        this.userDao = userDao;
     }
 
     /**
      * Creates a new department if the requester is an admin.
-     *       Note: we re-fetch the user inside the transaction to avoid
-     *       LazyInitializationException on the detached proxy.
+     * Note: we re-fetch the user inside the transaction to avoid
+     * LazyInitializationException on the detached proxy.
      */
     public Department createDepartment(UserEntity requester,
                                        String nameEn,

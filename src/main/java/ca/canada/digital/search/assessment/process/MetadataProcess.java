@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class MetadataProcess {
@@ -23,6 +24,8 @@ public class MetadataProcess {
     public MetadataProcess(URI uri) {
         this.uri = uri;
         metadata = new Metadata();
+        metadata.setUrl(uri.toString());
+        metadata.setLastUpdate(LocalDateTime.now());
     }
 
     public Metadata execute() {
@@ -57,7 +60,6 @@ public class MetadataProcess {
                             .parse(lastUpdate.first().attr("content"), DateTimeFormatter.ISO_LOCAL_DATE)
                             .atStartOfDay());
                 }
-
                 metadata.setTitle(doc.title());
 
             } else {

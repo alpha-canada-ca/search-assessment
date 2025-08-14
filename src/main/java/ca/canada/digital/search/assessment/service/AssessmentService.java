@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class AssessmentService {
     private final AssessmentDao assessmentDao;
     private final TermListDao termListDao;
-    private AssessmentConfiguration config;
+    private final AssessmentConfiguration config;
 
     public AssessmentService(AssessmentDao assessmentDao, TermListDao termListDao, AssessmentConfiguration config) {
         this.assessmentDao = assessmentDao;
@@ -35,7 +35,9 @@ public class AssessmentService {
         this.config = config;
     }
 
-    /** Anyone can fetch an assessment (with its termAssessments eagerly initialized). */
+    /**
+     * Anyone can fetch an assessment (with its termAssessments eagerly initialized).
+     */
     public Assessment get(Integer id) {
         Assessment a = assessmentDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("Assessment not found: " + id));
@@ -49,7 +51,9 @@ public class AssessmentService {
         return a;
     }
 
-    /** Anyone can list assessments for a list. */
+    /**
+     * Anyone can list assessments for a list.
+     */
     public List<Assessment> listByListId(Integer listId) {
         // Optional: verify list exists to return 404 instead of empty by mistake
         termListDao.findById(listId)
@@ -72,12 +76,23 @@ public class AssessmentService {
         a.setName(req.getName());
         a.setDate(req.getDate() != null ? req.getDate() : LocalDateTime.now());
 
-        a.getTermAssessments().addAll(terms);
+        for (TermAssessment ta : terms) {
+            ta.setId(null);
+            ta.setAssessment(a);             // owning side
+
+            if (ta.getMetadata() != null) {
+                ta.getMetadata().setId(null);
+                ta.getMetadata().setTermAssessment(ta);
+            }
+            a.getTermAssessments().add(ta);  // inverse side
+        }
 
         return assessmentDao.save(a);
     }
 
-    /** Delete an assessment. Must be a member of the list's department. */
+    /**
+     * Delete an assessment. Must be a member of the list's department.
+     */
     public void delete(UserEntity requester, Integer assessmentId) {
         Assessment a = assessmentDao.findById(assessmentId)
                 .orElseThrow(() -> new NotFoundException("Assessment not found: " + assessmentId));
@@ -118,7 +133,7 @@ public class AssessmentService {
         assessmentResponse.setHasSpecificSearch(hasSpecificSearch);
         assessmentResponse.setInternalUrl(
                 "fr".equalsIgnoreCase(lang.getCode()) ? config.getSearchPage().getGlobalFr() : config.getSearchPage().getGlobalEn());
-        assessmentResponse.setInternalScore(internalPasses > 0 ? String.format("%.01f", (internalPasses / count) * 100) + "%" : "0%");
+        assessmentResponse.setInternalScore((internalPasses > 0) ? (String.format("%.01f", (internalPasses / count) * 100) + "%") : "0%");
         assessmentResponse.setInternalTerms(internalTerms);
         if (hasSpecificSearch) {
             assessmentResponse.setInternalSpecificScore(internalSpecificPasses > 0 ? String.format("%.01f", (internalSpecificPasses / count) * 100) + "%" : "0%");

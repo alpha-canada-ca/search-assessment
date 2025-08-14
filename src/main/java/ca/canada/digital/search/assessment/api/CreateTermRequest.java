@@ -1,6 +1,5 @@
 package ca.canada.digital.search.assessment.api;
 
-import ca.canada.digital.search.assessment.model.TargetUrl;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;

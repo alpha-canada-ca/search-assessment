@@ -30,7 +30,9 @@ public class TermAssessmentDao extends AbstractDAO<TermAssessment> {
         return list(session.createQuery(cq));
     }
 
-    /** Exact match on target_url */
+    /**
+     * Exact match on target_url
+     */
     public List<TermAssessment> findByTargetUrl(String url) {
         return list(
                 currentSession().createQuery(
@@ -40,7 +42,9 @@ public class TermAssessmentDao extends AbstractDAO<TermAssessment> {
         );
     }
 
-    /** Exact match, for multiple URLs */
+    /**
+     * Exact match, for multiple URLs
+     */
     public List<TermAssessment> findByTargetUrls(Collection<String> urls) {
         if (urls == null || urls.isEmpty()) return List.of();
         return list(
@@ -51,7 +55,9 @@ public class TermAssessmentDao extends AbstractDAO<TermAssessment> {
         );
     }
 
-    /** Substring/contains match on target_url (case-sensitive depending on DB collation) */
+    /**
+     * Substring/contains match on target_url (case-sensitive depending on DB collation)
+     */
     public List<TermAssessment> findByTargetUrlContaining(String fragment) {
         if (fragment == null || fragment.isEmpty()) return List.of();
 

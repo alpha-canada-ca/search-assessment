@@ -16,11 +16,13 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,7 +32,7 @@ public class TermEvaluationProcess {
     private static final int NUM_OF_FIRST_URLS_TO_TEST = 10;
     private static final int NUM_OF_FIRST_RESULTS_TO_PASS = 3;
     private static final int DELAY_BETWEEN_PAGE_HITS = 500; // in milliseconds
-    private static final String GOOGLE_URL_PATTERN = "^(https:\\/\\/www.google.\\w{2,3}?\\/url?.*q=)?(http.*)(&|\\?)sa.*$";
+    private static final String GOOGLE_URL_PATTERN = "^(https://www.google.\\w{2,3}?/url?.*q=)?(http.*)([&?])sa.*$";
     private static final String GOOGLE_XPATH = "//*[@id=\"main\"]/div/div/div[1]/a";
     private static final String CANADA_CSS_PATH = "section h3 > a";
     private static final Logger LOG = LoggerFactory.getLogger(TermEvaluationProcess.class);
@@ -39,7 +41,7 @@ public class TermEvaluationProcess {
     private final Department department;
     private final Language lang;
     private final List<SearchResult> searchResults = new ArrayList<>();
-    WebDriver driver = null;
+    WebDriver driver;
 
     public TermEvaluationProcess(List<Term> terms, Department department, Language lang, WebDriver driver) {
         this.terms = terms;
@@ -90,6 +92,11 @@ public class TermEvaluationProcess {
             TermAssessment ta = new TermAssessment();
             Term term = searchResult.getTerm();
             ta.setTerm(term.getTerm());
+            ta.setSearchType(searchResult.getSearchType());
+            // default values
+            ta.setPass(false);
+            ta.setPosition(0);
+            ta.setTargetUrl(term.getTargetUrls().get(0).getUrl()); // We will have the first target URL as the default for metadata
 
             for (int i = 0; i < count; i++) { // results to be processed
                 // The evaluation logic
@@ -98,6 +105,7 @@ public class TermEvaluationProcess {
                             && url.getUrl().trim().equals(
                             searchResult.getReturnedUrls().get(i).trim())) {
                         ta.setPosition(i + 1);
+                        ta.setTargetUrl(url.getUrl());
                         if (i < NUM_OF_FIRST_RESULTS_TO_PASS) {
                             ta.setPass(true);
                         }
@@ -109,10 +117,10 @@ public class TermEvaluationProcess {
         }
     }
 
-    private boolean fetchSearchResults(TermAssessment.SearchType type) throws URISyntaxException {
+    private void fetchSearchResults(TermAssessment.SearchType type) throws URISyntaxException {
         String searchUrl = department.getSearchUrl(type, lang);
         if (StringUtils.isEmpty(searchUrl)) {
-            return false;
+            return;
         }
         URIBuilder uriBuilder = new URIBuilder(searchUrl);
         int errorCount = 0;
@@ -120,14 +128,11 @@ public class TermEvaluationProcess {
         boolean abort = false;
 
         for (Term term : terms) {
+
             if (abort) {
                 break;
             }
             SearchResult searchResult = new SearchResult();
-            searchResult.setTerm(term);
-
-            searchResults.add(searchResult);
-
 
             try {
                 uriBuilder.setParameter("q", term.getTerm());
@@ -136,7 +141,7 @@ public class TermEvaluationProcess {
                 URI uri = uriBuilder.build();
                 LOG.info("{}: {}", "Fetching URL", uri.toString());
 
-                Document doc = null;
+                Document doc;
 
                 if (type == TermAssessment.SearchType.GOOGLE) {
 
@@ -144,7 +149,6 @@ public class TermEvaluationProcess {
 
 
                 } else {
-
 
                     // Using Selenium to get the dynamically loaded content on a webpage. Search results are now loaded on the client-side on Canada.ca
                     driver.get(uri.toString());
@@ -156,11 +160,11 @@ public class TermEvaluationProcess {
                     // wait to get the results html elements
                     wait.until(ExpectedConditions.presenceOfElementLocated(resultItem));
 
-                    doc = Jsoup.parse(driver.getPageSource());
+                    doc = Jsoup.parse(Objects.requireNonNull(driver.getPageSource()));
 
                 }
 
-                if (doc != null && !StringUtils.isEmpty(doc.html())) {
+                if (!StringUtils.isEmpty(doc.html())) {
 
                     Elements urlElements;
 
@@ -191,24 +195,28 @@ public class TermEvaluationProcess {
                             urls.add(e.attr("abs:href"));
                         }
                     }
-
+                    searchResult.setTerm(term);
                     searchResult.setReturnedUrls(urls);
+                    searchResult.setSearchType(type);
+                    searchResults.add(searchResult);
 
                 } else {
                     errorCount++;
                     if (errorCount >= 3) {
                         LOG.error("The search page returned multiple errors and the process was aborted.");
-                        return false;
+                        return;
                     }
                 }
 
                 TimeUnit.MILLISECONDS.sleep(DELAY_BETWEEN_PAGE_HITS);
 
-            } catch (Exception e) {
+            } catch (IOException e) {
+                LOG.warn("It seems like Google has blocked us!", e);
+                abort = true;
+            } catch (InterruptedException e) {
                 LOG.error("Could not fetch results set for the search term {}", term.getTerm(), e);
             }
         }
-        return true;
 
     }
 }

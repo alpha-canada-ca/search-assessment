@@ -8,16 +8,27 @@ import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 public class CreateAssessmentRequest {
-    @NotNull @JsonProperty
+    @NotNull
+    @JsonProperty
     private Integer listId;
 
-    @NotBlank @Size(max = 100) @JsonProperty
+    @NotBlank
+    @Size(max = 100)
+    @JsonProperty
     private String name;
 
     @JsonProperty
     private LocalDateTime date; // optional; default now if null
 
-    public Integer getListId() { return listId; }
-    public String getName() { return name; }
-    public LocalDateTime getDate() { return date; }
+    public Integer getListId() {
+        return listId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public LocalDateTime getDate() {
+        return date;
+    }
 }

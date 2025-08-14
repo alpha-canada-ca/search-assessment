@@ -26,7 +26,7 @@ public class Term implements Serializable {
     @Column(name = "last_update", nullable = false)
     private LocalDateTime lastUpdate;
 
-    @Column(name="sequence", nullable=false)
+    @Column(name = "sequence", nullable = false)
     private Integer sequence;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

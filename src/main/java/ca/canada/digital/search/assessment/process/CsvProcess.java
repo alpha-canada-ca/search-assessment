@@ -19,7 +19,7 @@ public class CsvProcess {
     private OutputStream out;
     private Assessment assessment;
 
-    public CsvProcess (OutputStream out, Assessment assessment) {
+    public CsvProcess(OutputStream out, Assessment assessment) {
         this.out = out;
         this.assessment = assessment;
     }
@@ -48,8 +48,10 @@ public class CsvProcess {
                         boolean isPass = ta.getPass();
                         String targetUrl = ta.getTargetUrl();
                         String title = StringUtils.isEmpty(ta.getMetadata().getTitle()) ? null : ta.getMetadata().getTitle();
-                        String descriptions = StringUtils.isEmpty(ta.getMetadata().getDescription()) ? null : ta.getMetadata().getDescription();;
-                        String h1 = StringUtils.isEmpty(ta.getMetadata().getH1()) ? null : ta.getMetadata().getH1();;
+                        String descriptions = StringUtils.isEmpty(ta.getMetadata().getDescription()) ? null : ta.getMetadata().getDescription();
+                        ;
+                        String h1 = StringUtils.isEmpty(ta.getMetadata().getH1()) ? null : ta.getMetadata().getH1();
+                        ;
                         String type = searchType.toString();
                         String lastUpdate = DateUtil.dateToString(ta.getMetadata().getLastUpdate());
                         int position = ta.getPosition();

@@ -1,7 +1,6 @@
 package ca.canada.digital.search.assessment.api;
 
 import ca.canada.digital.search.assessment.model.TermAssessment;
-import ca.canada.digital.search.assessment.model.TermList;
 import ca.canada.digital.search.assessment.object.MetadataHighlight;
 
 import java.util.List;

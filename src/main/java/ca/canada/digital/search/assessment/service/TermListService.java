@@ -268,7 +268,7 @@ public class TermListService {
         term.get().setSequence(newPosition);
 
         // Build a map of existing URLs by id
-        Map<Integer,TargetUrl> existing = term.get().getTargetUrls().stream()
+        Map<Integer, TargetUrl> existing = term.get().getTargetUrls().stream()
                 .filter(u -> u.getId() != null)
                 .collect(Collectors.toMap(TargetUrl::getId, u -> u));
 

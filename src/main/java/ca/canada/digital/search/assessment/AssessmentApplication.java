@@ -34,6 +34,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.EnumSet;
 import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class AssessmentApplication extends Application<AssessmentConfiguration> {
 
@@ -92,6 +95,9 @@ public class AssessmentApplication extends Application<AssessmentConfiguration> 
         final TermListService termService = new TermListService(termListDao, termDao, langDao, userDao, targetUrlDao);
         final UserService userService = new UserService(userDao, departmentDao);
 
+        final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+                new LinkedBlockingQueue<Runnable>());
+
 
         final HttpClient httpClient = new HttpClientBuilder(environment).using(getConfig().getHttpClientConfiguration())
                 .build(getName());
@@ -118,15 +124,15 @@ public class AssessmentApplication extends Application<AssessmentConfiguration> 
         Authenticator<BasicCredentials, UserEntity> basicAuth =
                 uwpf.create(
                         BasicUserAuthenticator.class,
-                        new Class[]{ UserEntityDao.class },
-                        new Object[]{ userDao }
+                        new Class[]{UserEntityDao.class},
+                        new Object[]{userDao}
                 );
 
         Authenticator<String, UserEntity> tokenAuth =
                 uwpf.create(
                         SessionTokenAuthenticator.class,
-                        new Class[]{ UserSessionDao.class },
-                        new Object[]{ sessionDao }
+                        new Class[]{UserSessionDao.class},
+                        new Object[]{sessionDao}
                 );
 
 
@@ -156,7 +162,7 @@ public class AssessmentApplication extends Application<AssessmentConfiguration> 
         environment.jersey().register(new AuthValueFactoryProvider.Binder<>(UserEntity.class));
         environment.jersey().register(RolesAllowedDynamicFeature.class);
 
-        environment.jersey().register(new AssessmentResource(assessmentService, termService, termAssessmentService, config));
+        environment.jersey().register(new AssessmentResource(threadPool, hibernate, assessmentService, termService, termAssessmentService, userService));
         environment.jersey().register(new AuthResource(authService));
         environment.jersey().register(new DepartmentResource(deptService));
         environment.jersey().register(new TermListResource(termService));
@@ -171,4 +177,5 @@ public class AssessmentApplication extends Application<AssessmentConfiguration> 
     public void initialize(Bootstrap<AssessmentConfiguration> bootstrap) {
         bootstrap.addBundle(hibernate);
     }
+
 }
