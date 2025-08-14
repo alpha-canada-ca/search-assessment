@@ -111,15 +111,16 @@ public class AssessmentService {
         long count = assessment.getTermAssessments().stream()
                 .filter(term -> term.getSearchType() == TermAssessment.SearchType.INTERNAL)
                 .count();
-        long internalPasses = assessment.getTermAssessments().stream()
-                .filter(term -> term.getSearchType() == TermAssessment.SearchType.INTERNAL && term.getPass())
+        float internalPasses = assessment.getTermAssessments().stream()
+                .filter(term -> (term.getSearchType() == TermAssessment.SearchType.INTERNAL) && term.getPass())
                 .count();
-        long internalSpecificPasses = assessment.getTermAssessments().stream()
-                .filter(term -> term.getSearchType() == TermAssessment.SearchType.INTERNAL_SPECIFIC && term.getPass())
+        float internalSpecificPasses = assessment.getTermAssessments().stream()
+                .filter(term -> (term.getSearchType() == TermAssessment.SearchType.INTERNAL_SPECIFIC) && term.getPass())
                 .count();
-        long googlePasses = assessment.getTermAssessments().stream()
-                .filter(term -> term.getSearchType() == TermAssessment.SearchType.GOOGLE && term.getPass())
+        float googlePasses = assessment.getTermAssessments().stream()
+                .filter(term -> (term.getSearchType() == TermAssessment.SearchType.GOOGLE) && term.getPass())
                 .count();
+        System.out.println("Internal=" + internalPasses + "\nGoogle=" + googlePasses);
         List<TermAssessment> internalTerms = assessment.getTermAssessments().stream()
                 .filter(term -> term.getSearchType() == TermAssessment.SearchType.INTERNAL)
                 .sorted(
@@ -138,10 +139,10 @@ public class AssessmentService {
         assessmentResponse.setHasSpecificSearch(hasSpecificSearch);
         assessmentResponse.setInternalUrl(
                 "fr".equalsIgnoreCase(lang.getCode()) ? config.getSearchPage().getGlobalFr() : config.getSearchPage().getGlobalEn());
-        assessmentResponse.setInternalScore((internalPasses <= 0) ? "0%" : (String.format("%d%%", (internalPasses / count) * 100)));
+        assessmentResponse.setInternalScore((internalPasses <= 0) ? "0%" : (String.format("%.2f%%", (float) (internalPasses / count) * 100)));
         assessmentResponse.setInternalTerms(internalTerms);
         if (hasSpecificSearch) {
-            assessmentResponse.setInternalSpecificScore(internalSpecificPasses > 0 ? String.format("%d%%", (internalSpecificPasses / count) * 100) : "0%");
+            assessmentResponse.setInternalSpecificScore(internalSpecificPasses > 0 ? String.format("%.2f%%", (float) (internalSpecificPasses / count) * 100) : "0%");
             assessmentResponse.setInternalSpecificTerms(assessment.getTermAssessments().stream()
                     .filter(term -> term.getSearchType() == TermAssessment.SearchType.INTERNAL_SPECIFIC)
                     .sorted(
@@ -153,7 +154,7 @@ public class AssessmentService {
         }
         if (hasGoogleSearch) {
             assessmentResponse.setGoogleUrl(config.getSearchPage().getGoogle());
-            assessmentResponse.setGoogleScore(googlePasses > 0 ? String.format("%d%%", (googlePasses / count) * 100) : "0%");
+            assessmentResponse.setGoogleScore(googlePasses > 0 ? String.format("%.2f%%", (float) (googlePasses / count) * 100) : "0%");
             assessmentResponse.setGoogleTerms(assessment.getTermAssessments().stream()
                     .filter(term -> term.getSearchType() == TermAssessment.SearchType.GOOGLE)
                     .sorted(

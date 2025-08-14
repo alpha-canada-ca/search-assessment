@@ -192,6 +192,8 @@ public class TermEvaluationProcess {
                                 LOG.warn("It seems like Google has made a structure change to their search results page. Fix Google XPath and URL pattern.");
                                 LOG.warn(googleUrl);
                                 abort = true;
+                                // remove all Google assessments
+                                removeSearchResults(TermAssessment.SearchType.GOOGLE);
                                 break;
                             }
 
@@ -214,13 +216,19 @@ public class TermEvaluationProcess {
 
                 TimeUnit.MILLISECONDS.sleep(DELAY_BETWEEN_PAGE_HITS);
 
-            } catch (IOException e) {
+            } catch (IOException e) { // coming from jsoup
                 LOG.warn("It seems like Google has blocked us!", e);
                 abort = true;
+                // remove all Google assessments
+                removeSearchResults(TermAssessment.SearchType.GOOGLE);
             } catch (InterruptedException e) {
                 LOG.error("Could not fetch results set for the search term {}", term.getTerm(), e);
             }
         }
 
+    }
+
+    private void removeSearchResults(TermAssessment.SearchType type) {
+        searchResults.removeIf(r -> r.getSearchType() == type);
     }
 }
