@@ -96,6 +96,7 @@ public class TermEvaluationProcess {
             // default values
             ta.setPass(false);
             ta.setPosition(0);
+            ta.setSequence(term.getSequence());
             ta.setTargetUrl(term.getTargetUrls().get(0).getUrl()); // We will have the first target URL as the default for metadata
 
             for (int i = 0; i < count; i++) { // results to be processed
