@@ -5,6 +5,7 @@ import ca.canada.digital.search.assessment.model.Department;
 import ca.canada.digital.search.assessment.model.UserEntity;
 import ca.canada.digital.search.assessment.service.DepartmentService;
 import io.dropwizard.auth.Auth;
+import io.dropwizard.hibernate.UnitOfWork;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -27,6 +28,7 @@ public class DepartmentResource {
      * POST /departments
      */
     @POST
+    @UnitOfWork
     public Response createDepartment(@Auth UserEntity admin,
                                      @Valid CreateDepartmentRequest req) {
         Department dept = departmentService.createDepartment(
@@ -45,7 +47,9 @@ public class DepartmentResource {
         ).entity(dept).build();
     }
 
+
     @GET
+    @UnitOfWork
     public Response listDepartments(@QueryParam("limit") @DefaultValue("" + MAX_LIMIT) int limit) {
         int safeLimit = Math.min(limit, MAX_LIMIT);
         List<Department> depts = departmentService.listDepartments(0, safeLimit);
@@ -57,6 +61,7 @@ public class DepartmentResource {
      */
     @DELETE
     @Path("/{id}")
+    @UnitOfWork
     public Response deleteDepartment(@Auth UserEntity admin,
                                      @PathParam("id") Integer id) {
         departmentService.deleteDepartment(admin, id);

@@ -1,5 +1,6 @@
 package ca.canada.digital.search.assessment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -11,7 +12,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "term",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"index", "list_id"}))
+        uniqueConstraints = @UniqueConstraint(columnNames = {"sequence", "list_id"}))
 public class Term implements Serializable {
 
     @Id
@@ -25,24 +26,27 @@ public class Term implements Serializable {
     @Column(name = "last_update", nullable = false)
     private LocalDateTime lastUpdate;
 
-    @Column(name = "index", nullable = false)
-    private Integer index;
+    @Column(name="sequence", nullable=false)
+    private Integer sequence;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "list_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     private TermList termList;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private UserEntity user;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "language_id", nullable = false)
+    @JsonIgnore
     private Language language;
 
     @OneToMany(mappedBy = "term", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TargetUrl> targets = new ArrayList<>();
+    private List<TargetUrl> targetUrls = new ArrayList<>();
 
     public Integer getId() {
         return id;
@@ -68,12 +72,12 @@ public class Term implements Serializable {
         this.lastUpdate = lastUpdate;
     }
 
-    public Integer getIndex() {
-        return index;
+    public Integer getSequence() {
+        return sequence;
     }
 
-    public void setIndex(Integer index) {
-        this.index = index;
+    public void setSequence(Integer sequence) {
+        this.sequence = sequence;
     }
 
     public TermList getTermList() {
@@ -100,11 +104,11 @@ public class Term implements Serializable {
         this.language = language;
     }
 
-    public List<TargetUrl> getTargets() {
-        return targets;
+    public List<TargetUrl> getTargetUrls() {
+        return targetUrls;
     }
 
-    public void setTargets(List<TargetUrl> targets) {
-        this.targets = targets;
+    public void setTargetUrls(List<TargetUrl> targetUrls) {
+        this.targetUrls = targetUrls;
     }
 }

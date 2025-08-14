@@ -2,10 +2,6 @@ package ca.canada.digital.search.assessment.dao;
 
 import ca.canada.digital.search.assessment.model.Assessment;
 import io.dropwizard.hibernate.AbstractDAO;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 
 import java.util.List;
@@ -16,18 +12,32 @@ public class AssessmentDao extends AbstractDAO<Assessment> {
         super(factory);
     }
 
-    public Optional<Assessment> findById(Long id) {
+    public Optional<Assessment> findById(Integer id) {
         return Optional.ofNullable(get(id));
     }
 
-    public List<Assessment> findAll() {
-        Session session = currentSession();
-        CriteriaBuilder cb = session.getCriteriaBuilder();
-        CriteriaQuery<Assessment> cq = cb.createQuery(Assessment.class);
-        Root<Assessment> root = cq.from(Assessment.class);
-        cq.select(root);
-        return list(session.createQuery(cq));
+    public List<Assessment> findByListId(Integer listId) {
+        return list(
+                currentSession()
+                        .createQuery(
+                                "from Assessment a where a.termList.id = :listId order by a.date desc, a.id desc",
+                                Assessment.class
+                        )
+                        .setParameter("listId", listId)
+        );
     }
+
+    public List<Assessment> findByDepartmentId(Integer deptId) {
+        return list(
+                currentSession()
+                        .createQuery(
+                                "from Assessment a where a.termList.department.id = :deptId order by a.date desc, a.id desc",
+                                Assessment.class
+                        )
+                        .setParameter("deptId", deptId)
+        );
+    }
+
 
     public Assessment save(Assessment assessment) {
         return persist(assessment);

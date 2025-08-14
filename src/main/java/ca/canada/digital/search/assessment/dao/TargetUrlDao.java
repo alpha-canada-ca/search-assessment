@@ -30,7 +30,11 @@ public class TargetUrlDao extends AbstractDAO<TargetUrl> {
     }
 
     public TargetUrl save(TargetUrl url) {
-        return persist(url);
+        if (url.getId() != null) {
+            return currentSession().merge(url);
+        } else {
+            return persist(url);
+        }
     }
 
     public void delete(TargetUrl url) {

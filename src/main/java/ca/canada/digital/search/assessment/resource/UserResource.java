@@ -8,6 +8,7 @@ import ca.canada.digital.search.assessment.model.PasswordResetToken;
 import ca.canada.digital.search.assessment.model.UserEntity;
 import ca.canada.digital.search.assessment.service.UserService;
 import io.dropwizard.auth.Auth;
+import io.dropwizard.hibernate.UnitOfWork;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -17,7 +18,7 @@ import jakarta.ws.rs.core.Response;
 import java.util.List;
 
 @Tag(name = "User Services")
-@Path("/user")
+@Path("/users")
 @Produces(MediaType.APPLICATION_JSON)
 public class UserResource {
     private static final int MAX_LIMIT = 100;
@@ -32,18 +33,21 @@ public class UserResource {
     }
 
     @GET
+    @UnitOfWork
     @Path("/me")
     public UserEntity getProfile(@Auth UserEntity user) {
-        return user;
+        return userService.getUser(user.getId());
     }
 
     @GET
+    @UnitOfWork
     public Response listUsers(@Auth UserEntity requester) {
         List<UserEntity> users = userService.listUsers(requester, 0, MAX_LIMIT);
         return Response.ok(users).build();
     }
 
     @POST
+    @UnitOfWork
     public UserEntity create(@Auth UserEntity admin,
                              @Valid CreateUserRequest req) {
         return userService.createUser(
@@ -52,11 +56,13 @@ public class UserResource {
                 req.getPassword(),
                 req.getFirstName(),
                 req.getLastName(),
-                req.getDepartmentId()
+                req.getDepartmentId(),
+                req.getAdmin()
         );
     }
 
     @DELETE
+    @UnitOfWork
     @Path("/{id}")
     public Response deleteUser(@Auth UserEntity admin,
                                @PathParam("id") Integer userId) {
@@ -66,6 +72,7 @@ public class UserResource {
 
     // TODO Configure emailing reset token to users
     @POST
+    @UnitOfWork
     @Path("/reset-password")
     public Response reset(@Valid ResetPayload p) {
         PasswordResetToken t = tokenDao.findValid(p.getToken())

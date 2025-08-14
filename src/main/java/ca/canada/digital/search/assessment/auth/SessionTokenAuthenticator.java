@@ -16,8 +16,8 @@ public class SessionTokenAuthenticator implements Authenticator<String, UserEnti
         this.sessionDao = sessionDao;
     }
 
-    @Override
     @UnitOfWork
+    @Override
     public Optional<UserEntity> authenticate(String token) {
         return sessionDao.findByToken(token)
                 .filter(s -> s.getExpiresAt().isAfter(LocalDateTime.now()))

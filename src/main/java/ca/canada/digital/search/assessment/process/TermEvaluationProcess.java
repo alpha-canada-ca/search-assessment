@@ -1,6 +1,7 @@
 package ca.canada.digital.search.assessment.process;
 
-import ca.canada.digital.search.assessment.object.*;
+import ca.canada.digital.search.assessment.model.*;
+import ca.canada.digital.search.assessment.object.SearchResult;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.net.URIBuilder;
 import org.jsoup.Jsoup;
@@ -33,94 +34,103 @@ public class TermEvaluationProcess {
     private static final String GOOGLE_XPATH = "//*[@id=\"main\"]/div/div/div[1]/a";
     private static final String CANADA_CSS_PATH = "section h3 > a";
     private static final Logger LOG = LoggerFactory.getLogger(TermEvaluationProcess.class);
-    private final List<SearchTerm> searchTerms;
+    private final List<Term> terms;
+    private final List<TermAssessment> assessmentTerms = new ArrayList<>();
     private final Department department;
-    private final SearchType type;
     private final Language lang;
     private final List<SearchResult> searchResults = new ArrayList<>();
     WebDriver driver = null;
-    private List<TermEvaluation> evaluatedTerms;
 
-
-    public TermEvaluationProcess(List<SearchTerm> searchTerms, Department department, SearchType type, Language lang, WebDriver driver) {
-        this.searchTerms = searchTerms;
+    public TermEvaluationProcess(List<Term> terms, Department department, Language lang, WebDriver driver) {
+        this.terms = terms;
         this.department = department;
-        this.type = type;
         this.lang = lang;
         this.driver = driver;
 
     }
 
-    public List<TermEvaluation> execute() {
+    public List<TermAssessment> execute() {
 
         try {
-            // Fetch the search page and get the top search results
-            fetchSearchResults();
+            // Fetch the all search pages and get the top search results
+            for (TermAssessment.SearchType type : TermAssessment.SearchType.values()) {
+                fetchSearchResults(type);
+            }
             // Evaluate the top NUM_OF_FIRST_URLS_TO_TEST URLs
             evaluateSearchResults();
             // Populate target URLs metadata
-            setTargerUrlsMetadata();
+            setMetadata();
 
         } catch (URISyntaxException e) {
             LOG.error("The search page URL is not properly formatted.", e);
         }
 
-        return evaluatedTerms;
+        return assessmentTerms;
 
     }
 
-    private void setTargerUrlsMetadata() throws URISyntaxException {
+    private void setMetadata() throws URISyntaxException {
         MetadataProcess metaProcess;
 
-        for (TermEvaluation evaluatedTerm : evaluatedTerms) {
-            if (!StringUtils.isEmpty(evaluatedTerm.getSearchTerm().getTargetUrl())) {
-                URI uri = new URI(evaluatedTerm.getSearchTerm().getTargetUrl().trim());
+        for (TermAssessment assessmentsTerm : assessmentTerms) {
+            if (!StringUtils.isEmpty(assessmentsTerm.getTargetUrl())) {
+                URI uri = new URI(assessmentsTerm.getTargetUrl().trim());
 
                 metaProcess = new MetadataProcess(uri);
-                evaluatedTerm.setTargetUrlMetadata(metaProcess.execute());
+                assessmentsTerm.setMetadata(metaProcess.execute());
             } else {
-                LOG.warn("The term {} has no target URL.", evaluatedTerm.getSearchTerm().getTerm());
+                LOG.warn("The term {} has no target URL.", assessmentsTerm.getTerm());
             }
         }
     }
 
     private void evaluateSearchResults() {
-        evaluatedTerms = new ArrayList<>();
         for (SearchResult searchResult : searchResults) {
             int count = Math.min(searchResult.getReturnedUrls().size(), NUM_OF_FIRST_URLS_TO_TEST);
-            TermEvaluation te = new TermEvaluation();
-            te.setSearchTerm(searchResult.getSearchTerm());
+            TermAssessment ta = new TermAssessment();
+            Term term = searchResult.getTerm();
+            ta.setTerm(term.getTerm());
 
-            for (int i = 0; i < count; i++) {
+            for (int i = 0; i < count; i++) { // results to be processed
                 // The evaluation logic
-                if (searchResult.getSearchTerm() != null
-                        && !StringUtils.isEmpty(searchResult.getSearchTerm().getTargetUrl())
-                        && searchResult.getSearchTerm().getTargetUrl().trim().equals(
-                        searchResult.getReturnedUrls().get(i).trim())) {
-                    te.setPassUrlPosition(i + 1);
-                    if (i < NUM_OF_FIRST_RESULTS_TO_PASS) {
-                        te.setPass(true);
+                for (TargetUrl url : term.getTargetUrls()) { // Check for each URL and stop if any is found
+                    if (!StringUtils.isEmpty(url.getUrl())
+                            && url.getUrl().trim().equals(
+                            searchResult.getReturnedUrls().get(i).trim())) {
+                        ta.setPosition(i + 1);
+                        if (i < NUM_OF_FIRST_RESULTS_TO_PASS) {
+                            ta.setPass(true);
+                        }
+                        break;
                     }
-                    break;
                 }
             }
-            evaluatedTerms.add(te);
+            assessmentTerms.add(ta);
         }
     }
 
-    private boolean fetchSearchResults() throws URISyntaxException {
-        URIBuilder uriBuilder = new URIBuilder(department.getSearchPage(type, lang));
+    private boolean fetchSearchResults(TermAssessment.SearchType type) throws URISyntaxException {
+        String searchUrl = department.getSearchUrl(type, lang);
+        if (StringUtils.isEmpty(searchUrl)) {
+            return false;
+        }
+        URIBuilder uriBuilder = new URIBuilder(searchUrl);
         int errorCount = 0;
 
-        for (SearchTerm searchTerm : searchTerms) {
+        boolean abort = false;
+
+        for (Term term : terms) {
+            if (abort) {
+                break;
+            }
             SearchResult searchResult = new SearchResult();
-            searchResult.setSearchTerm(searchTerm);
+            searchResult.setTerm(term);
 
             searchResults.add(searchResult);
 
 
             try {
-                uriBuilder.setParameter("q", searchTerm.getTerm());
+                uriBuilder.setParameter("q", term.getTerm());
                 uriBuilder.setParameter("lang", lang.getCode());
 
                 URI uri = uriBuilder.build();
@@ -128,7 +138,7 @@ public class TermEvaluationProcess {
 
                 Document doc = null;
 
-                if (type == SearchType.GOOGLE) {
+                if (type == TermAssessment.SearchType.GOOGLE) {
 
                     doc = Jsoup.connect(uri.toString()).userAgent(USER_AGENT).get();
 
@@ -154,7 +164,7 @@ public class TermEvaluationProcess {
 
                     Elements urlElements;
 
-                    if (type == SearchType.GOOGLE) {
+                    if (type == TermAssessment.SearchType.GOOGLE) {
                         urlElements = doc.selectXpath(GOOGLE_XPATH); // This changes often due to Google's UI changes
                     } else {
                         urlElements = doc.select(CANADA_CSS_PATH);
@@ -163,7 +173,7 @@ public class TermEvaluationProcess {
                     List<String> urls = new ArrayList<>();
 
                     for (Element e : urlElements) {
-                        if (type == SearchType.GOOGLE) {
+                        if (type == TermAssessment.SearchType.GOOGLE) {
                             String googleUrl = e.attr("abs:href");
                             Pattern pattern = Pattern.compile(GOOGLE_URL_PATTERN);
                             Matcher m = pattern.matcher(googleUrl);
@@ -173,6 +183,8 @@ public class TermEvaluationProcess {
                             } else {
                                 LOG.warn("It seems like Google has made a structure change to their search results page. Fix Google XPath and URL pattern.");
                                 LOG.warn(googleUrl);
+                                abort = true;
+                                break;
                             }
 
                         } else {
@@ -185,7 +197,7 @@ public class TermEvaluationProcess {
                 } else {
                     errorCount++;
                     if (errorCount >= 3) {
-                        LOG.error("The search page returned multiple errors and the processed was aborted.");
+                        LOG.error("The search page returned multiple errors and the process was aborted.");
                         return false;
                     }
                 }
@@ -193,7 +205,7 @@ public class TermEvaluationProcess {
                 TimeUnit.MILLISECONDS.sleep(DELAY_BETWEEN_PAGE_HITS);
 
             } catch (Exception e) {
-                LOG.error("Could not fetch results set for the search term {}", searchTerm.getTerm(), e);
+                LOG.error("Could not fetch results set for the search term {}", term.getTerm(), e);
             }
         }
         return true;

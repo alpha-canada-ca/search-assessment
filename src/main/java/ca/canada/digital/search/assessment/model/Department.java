@@ -1,6 +1,9 @@
 package ca.canada.digital.search.assessment.model;
 
+import ca.canada.digital.search.assessment.AssessmentApplication;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -38,9 +41,11 @@ public class Department implements Serializable {
     private String searchUrlFr;
 
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<UserEntity> users = new ArrayList<>();
 
     @OneToMany(mappedBy = "department", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<TermList> termLists = new ArrayList<>();
 
     public Integer getId() {
@@ -113,5 +118,23 @@ public class Department implements Serializable {
 
     public void setTermLists(List<TermList> termLists) {
         this.termLists = termLists;
+    }
+
+    public String getSearchUrl(TermAssessment.SearchType type, Language lang) {
+        if (type == TermAssessment.SearchType.GOOGLE) {
+            return AssessmentApplication.getConfig().getSearchPage().getGoogle();
+        } else if (type == TermAssessment.SearchType.INTERNAL_SPECIFIC && !StringUtils.isEmpty(getSearchUrlEn()) && !StringUtils.isEmpty(getSearchUrlFr())) {
+            if ("fr".equalsIgnoreCase(lang.getCode())) {
+                return getSearchUrlFr();
+            } else {
+                return getSearchUrlEn();
+            }
+        } else {
+            if ("fr".equalsIgnoreCase(lang.getCode())) {
+                return AssessmentApplication.getConfig().getSearchPage().getGlobalFr();
+            } else {
+                return AssessmentApplication.getConfig().getSearchPage().getGlobalEn();
+            }
+        }
     }
 }

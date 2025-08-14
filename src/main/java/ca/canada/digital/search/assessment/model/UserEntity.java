@@ -1,5 +1,6 @@
 package ca.canada.digital.search.assessment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -19,6 +20,7 @@ public class UserEntity implements Serializable, Principal {
     private Integer id;
 
     @Column(nullable = false, length = 255)
+    @JsonIgnore
     private String password;
 
     @Column(nullable = false, length = 50)
@@ -38,12 +40,15 @@ public class UserEntity implements Serializable, Principal {
     private Department department;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<GenericTerm> genericTerms = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<TermList> termLists = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Term> terms = new ArrayList<>();
 
     public Integer getId() {

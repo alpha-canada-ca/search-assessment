@@ -1,18 +1,20 @@
 package ca.canada.digital.search.assessment.object;
 
+import ca.canada.digital.search.assessment.model.Term;
+
 import java.util.List;
 
 public class SearchResult {
-    private SearchTerm searchTerm;
+    private Term term;
     private List<String> returnedUrls;
 
 
-    public SearchTerm getSearchTerm() {
-        return searchTerm;
+    public Term getTerm() {
+        return term;
     }
 
-    public void setSearchTerm(SearchTerm searchTerm) {
-        this.searchTerm = searchTerm;
+    public void setTerm(Term term) {
+        this.term = term;
     }
 
     public List<String> getReturnedUrls() {

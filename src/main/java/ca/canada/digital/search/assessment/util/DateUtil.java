@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 public class DateUtil {
@@ -21,7 +22,7 @@ public class DateUtil {
         return null;
     }
 
-    public static String dateToString(Date date) {
+    public static String dateToString(LocalDateTime date) {
         if (date == null) {
             return null;
         }

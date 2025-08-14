@@ -1,22 +1,29 @@
 package ca.canada.digital.search.assessment.service;
 
 import ca.canada.digital.search.assessment.dao.DepartmentDao;
+import ca.canada.digital.search.assessment.dao.UserEntityDao;
 import ca.canada.digital.search.assessment.model.Department;
 import ca.canada.digital.search.assessment.model.UserEntity;
+import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotFoundException;
 
 import java.util.List;
 
 public class DepartmentService {
-    private final DepartmentDao departmentDao;
+    private final DepartmentDao    departmentDao;
+    private final UserEntityDao userDao;
 
-    public DepartmentService(DepartmentDao departmentDao) {
+    public DepartmentService(DepartmentDao departmentDao,
+                             UserEntityDao userDao) {
         this.departmentDao = departmentDao;
+        this.userDao       = userDao;
     }
 
     /**
      * Creates a new department if the requester is an admin.
+     *       Note: we re-fetch the user inside the transaction to avoid
+     *       LazyInitializationException on the detached proxy.
      */
     public Department createDepartment(UserEntity requester,
                                        String nameEn,
@@ -25,7 +32,13 @@ public class DepartmentService {
                                        String acronymFr,
                                        String searchUrlEn,
                                        String searchUrlFr) {
-        if (!requester.isAdmin()) {
+
+        // Re‐attach the user in the current session
+        UserEntity admin = userDao
+                .findById(requester.getId())
+                .orElseThrow(() -> new BadRequestException("Invalid user"));
+
+        if (!admin.isAdmin()) {
             throw new ForbiddenException("Only admins may create departments");
         }
         Department dept = new Department();

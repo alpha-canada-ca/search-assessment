@@ -4,9 +4,9 @@ public enum Language {
     ENGLISH("en"),
     FRENCH("fr");
 
-    private final String code;
+    private String code;
 
-    Language(String code) {
+    private Language(String code) {
         this.code = code;
     }
 

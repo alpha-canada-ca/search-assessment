@@ -3,6 +3,7 @@ package ca.canada.digital.search.assessment.resource;
 import ca.canada.digital.search.assessment.api.LoginRequest;
 import ca.canada.digital.search.assessment.api.LoginResponse;
 import ca.canada.digital.search.assessment.service.AuthService;
+import io.dropwizard.hibernate.UnitOfWork;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
@@ -10,7 +11,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
-@Path("/login")
+@Path("/auth")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 public class AuthResource {
@@ -28,6 +29,8 @@ public class AuthResource {
      * @return LoginResponse containing the bearer token
      */
     @POST
+    @UnitOfWork
+    @Path("/login")
     public Response login(@Valid LoginRequest req,
                           @Context HttpServletRequest httpRequest) {
         String ip = httpRequest.getRemoteAddr();
@@ -44,6 +47,7 @@ public class AuthResource {
     }
 
     @DELETE
+    @UnitOfWork
     @Path("/logout")
     public Response logout(@HeaderParam("Authorization") String authHeader) {
         if (authHeader != null && authHeader.startsWith("Bearer ")) {

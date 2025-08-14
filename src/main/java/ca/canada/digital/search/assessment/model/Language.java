@@ -1,5 +1,6 @@
 package ca.canada.digital.search.assessment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -23,12 +24,15 @@ public class Language implements Serializable {
     private String name;
 
     @OneToMany(mappedBy = "language", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<GenericTerm> genericTerms = new ArrayList<>();
 
     @OneToMany(mappedBy = "language", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<TermList> termLists = new ArrayList<>();
 
     @OneToMany(mappedBy = "language", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Term> terms = new ArrayList<>();
 
     public Integer getId() {

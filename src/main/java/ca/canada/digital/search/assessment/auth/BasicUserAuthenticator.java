@@ -2,12 +2,13 @@ package ca.canada.digital.search.assessment.auth;
 
 import ca.canada.digital.search.assessment.dao.UserEntityDao;
 import ca.canada.digital.search.assessment.model.UserEntity;
-import ca.canada.digital.search.assessment.object.Credential;
 import io.dropwizard.auth.Authenticator;
+import io.dropwizard.auth.basic.BasicCredentials;
+import io.dropwizard.hibernate.UnitOfWork;
 
 import java.util.Optional;
 
-public class BasicUserAuthenticator implements Authenticator<Credential, UserEntity> {
+public class BasicUserAuthenticator implements Authenticator<BasicCredentials, UserEntity> {
     private final UserEntityDao userDao;
 
     public BasicUserAuthenticator(UserEntityDao userDao) {
@@ -15,7 +16,8 @@ public class BasicUserAuthenticator implements Authenticator<Credential, UserEnt
     }
 
     @Override
-    public Optional<UserEntity> authenticate(Credential credentials) {
+    @UnitOfWork
+    public Optional<UserEntity> authenticate(BasicCredentials credentials) {
         return userDao.findByEmail(credentials.getUsername())
                 .filter(user -> user.checkPassword(credentials.getPassword()));
     }

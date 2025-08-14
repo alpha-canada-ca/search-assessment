@@ -30,6 +30,10 @@ public class CreateUserRequest {
     @JsonProperty
     private Integer departmentId;
 
+    @JsonProperty
+    private Boolean admin;
+
+
     // Jackson needs a no-args constructor
     public CreateUserRequest() {
     }
@@ -54,4 +58,13 @@ public class CreateUserRequest {
     public Integer getDepartmentId() {
         return departmentId;
     }
+
+    public Boolean getAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(Boolean admin) {
+        this.admin = admin;
+    }
+
 }

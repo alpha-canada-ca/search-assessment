@@ -1,5 +1,6 @@
 package ca.canada.digital.search.assessment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
@@ -25,6 +26,7 @@ public class TermList implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "department_id", nullable = false)
+    @JsonIgnore
     private Department department;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -32,9 +34,11 @@ public class TermList implements Serializable {
     private UserEntity user;
 
     @OneToMany(mappedBy = "termList", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Assessment> assessments = new ArrayList<>();
 
     @OneToMany(mappedBy = "termList", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Term> terms = new ArrayList<>();
 
     public Integer getId() {

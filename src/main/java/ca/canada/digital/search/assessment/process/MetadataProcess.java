@@ -1,9 +1,10 @@
 package ca.canada.digital.search.assessment.process;
 
-import ca.canada.digital.search.assessment.object.Metadata;
+import ca.canada.digital.search.assessment.model.Metadata;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +12,8 @@ import org.slf4j.LoggerFactory;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 public class MetadataProcess {
     private static final Logger LOG = LoggerFactory.getLogger(MetadataProcess.class);
@@ -43,14 +45,17 @@ public class MetadataProcess {
                     metadata.setDescription(desc.get(0).attr("content"));
                 }
 
-                Elements keywords = doc.select("meta[name=keywords]");
-                if (!keywords.isEmpty()) {
-                    metadata.setKeywords(keywords.first().attr("content"));
+                Element h1Element = doc.selectFirst("h1");
+                String h1 = h1Element.text().trim();
+                if (!StringUtils.isEmpty(h1)) {
+                    metadata.setH1(h1);
                 }
 
                 Elements lastUpdate = doc.select("meta[name=dcterms.modified]");
                 if (!lastUpdate.isEmpty()) {
-                    metadata.setLastUpdate(new SimpleDateFormat("yyyy-MM-dd").parse(lastUpdate.first().attr("content")));
+                    metadata.setLastUpdate(LocalDate
+                            .parse(lastUpdate.first().attr("content"), DateTimeFormatter.ISO_LOCAL_DATE)
+                            .atStartOfDay());
                 }
 
                 metadata.setTitle(doc.title());

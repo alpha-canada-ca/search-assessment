@@ -37,9 +37,16 @@ public class UserService {
                                  String plainPassword,
                                  String firstName,
                                  String lastName,
-                                 Integer departmentId) {
+                                 Integer departmentId,
+                                 Boolean isAdmin) {
+
+        // Re‐attach the user in the current session
+        UserEntity admin = userDao
+                .findById(requester.getId())
+                .orElseThrow(() -> new BadRequestException("Invalid user"));
+
         // 1) Only admins may do this
-        if (!requester.isAdmin()) {
+        if (!admin.isAdmin()) {
             throw new ForbiddenException("Only admins may create new users");
         }
 
@@ -53,18 +60,23 @@ public class UserService {
         user.setPassword(plainPassword);     // hashes internally via BCrypt
         user.setFirstName(firstName);
         user.setLastName(lastName);
-        user.setAdmin(false);                // new users are non-admin by default
+        user.setAdmin(isAdmin);
         user.setDepartment(dept);
 
         return userDao.save(user);
     }
 
     public List<UserEntity> listUsers(UserEntity requester, int offset, int max) {
-        if (requester.isAdmin()) {
+        // Re‐attach the user in the current session
+        UserEntity user = userDao
+                .findById(requester.getId())
+                .orElseThrow(() -> new BadRequestException("Invalid user"));
+
+        if (user.isAdmin()) {
             // requires you have a userDao.findAll()
             return userDao.findAll(offset, max);
         } else {
-            Integer deptId = requester.getDepartment().getId();
+            Integer deptId = user.getDepartment().getId();
             return userDao.findByDepartment(deptId);
         }
     }
@@ -79,6 +91,12 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("User not found: " + userId));
 
         userDao.delete(user);
+    }
+
+    public UserEntity getUser(Integer userId) {
+        return userDao
+                .findById(userId)
+                .orElseThrow(() -> new BadRequestException("Invalid user"));
     }
 
 }

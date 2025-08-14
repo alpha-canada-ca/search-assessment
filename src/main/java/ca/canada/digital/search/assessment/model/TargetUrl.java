@@ -1,5 +1,6 @@
 package ca.canada.digital.search.assessment.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -7,7 +8,15 @@ import org.hibernate.annotations.OnDeleteAction;
 import java.io.Serializable;
 
 @Entity
-@Table(name = "target_url")
+@Table(name = "target_url",
+        uniqueConstraints = {
+                // prevent the same url from being associated twice with the same term
+                @UniqueConstraint(
+                        name = "target_url_pk",
+                        columnNames = {"term_id", "target_url"}
+                )
+        }
+)
 public class TargetUrl implements Serializable {
 
     @Id
@@ -21,6 +30,7 @@ public class TargetUrl implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "term_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     private Term term;
 
     public Integer getId() {

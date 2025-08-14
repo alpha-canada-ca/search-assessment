@@ -1,6 +1,10 @@
 package ca.canada.digital.search.assessment.process;
 
+import ca.canada.digital.search.assessment.model.Metadata;
+import ca.canada.digital.search.assessment.object.Highlight;
 import ca.canada.digital.search.assessment.object.Language;
+import ca.canada.digital.search.assessment.object.MetadataHighlight;
+import ca.canada.digital.search.assessment.util.DateUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.LowerCaseFilter;
@@ -35,7 +39,7 @@ public class LanguageProcess {
     private String applyFilters(String term, Language lang) {
         ts = this.analyzer.tokenStream("term", new StringReader(term));
         ts = new LowerCaseFilter(ts);
-        if (Language.FRENCH == lang) {
+        if ("fr".equalsIgnoreCase(lang.getCode())) {
             ts = new FrenchLightStemFilter(ts);
         } else {
             ts = new PorterStemFilter(ts);
@@ -144,6 +148,36 @@ public class LanguageProcess {
 
     public String getProcessedTerm() {
         return processedTerm;
+    }
+
+    public MetadataHighlight getHighlightedMetadata(Metadata md) {
+
+        MetadataHighlight highlights = new MetadataHighlight();
+
+        Highlight title = new Highlight();
+        title.setText(md.getTitle());
+        title.setHighlightedText(getHighlights(md.getTitle()));
+        title.setMatches(getMatches(md.getTitle()));
+        highlights.setTitle(title);
+
+        Highlight desc = new Highlight();
+        desc.setText(md.getDescription());
+        desc.setHighlightedText(getHighlights(md.getDescription()));
+        desc.setMatches(getMatches(md.getDescription()));
+        highlights.setDescription(desc);
+
+        Highlight h1 = new Highlight();
+        h1.setText(md.getH1());
+        h1.setHighlightedText(getHighlights(md.getH1()));
+        h1.setMatches(getMatches(md.getH1()));
+        highlights.setH1(h1);
+
+        Highlight lastUpdate = new Highlight();
+        lastUpdate.setText(DateUtil.dateToString(md.getLastUpdate()));
+        highlights.setLastUpdate(lastUpdate);
+
+        return highlights;
+
     }
 
 }

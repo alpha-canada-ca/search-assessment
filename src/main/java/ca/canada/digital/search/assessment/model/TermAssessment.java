@@ -1,10 +1,13 @@
 package ca.canada.digital.search.assessment.model;
 
+import ca.canada.digital.search.assessment.object.Highlight;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import java.io.Serializable;
+import java.util.Map;
 
 @Entity
 @Table(name = "term_assessment")
@@ -18,10 +21,14 @@ public class TermAssessment implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "assessment_id", nullable = false)
     @OnDelete(action = OnDeleteAction.CASCADE)
+    @JsonIgnore
     private Assessment assessment;
 
     @Column(nullable = false, length = 70)
     private String term;
+
+    @Column(name="sequence", nullable=false)
+    private Integer sequence;
 
     @Column(name = "is_pass", nullable = false)
     private Boolean pass;
@@ -61,6 +68,14 @@ public class TermAssessment implements Serializable {
 
     public void setTerm(String term) {
         this.term = term;
+    }
+
+    public Integer getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(Integer sequence) {
+        this.sequence = sequence;
     }
 
     public Boolean getPass() {

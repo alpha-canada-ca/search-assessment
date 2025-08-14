@@ -16,7 +16,7 @@ public class TermDao extends AbstractDAO<Term> {
         super(factory);
     }
 
-    public Optional<Term> findById(Long id) {
+    public Optional<Term> findById(Integer id) {
         return Optional.ofNullable(get(id));
     }
 
@@ -40,7 +40,11 @@ public class TermDao extends AbstractDAO<Term> {
     }
 
     public Term save(Term term) {
-        return persist(term);
+        if (term.getId() != null) {
+            return currentSession().merge(term);
+        } else {
+            return persist(term);
+        }
     }
 
     public void delete(Term term) {
