@@ -33,46 +33,20 @@ public class TermAssessmentDao extends AbstractDAO<TermAssessment> {
     /**
      * Exact match on target_url
      */
-    public List<TermAssessment> findByTargetUrl(String url) {
+    public List<TermAssessment> findByTargetUrl(String url, Integer departmentId, Integer languageId) {
         return list(
-                currentSession().createQuery(
-                        "from TermAssessment ta where ta.targetUrl = :url",
-                        TermAssessment.class
-                ).setParameter("url", url)
-        );
-    }
-
-    /**
-     * Exact match, for multiple URLs
-     */
-    public List<TermAssessment> findByTargetUrls(Collection<String> urls) {
-        if (urls == null || urls.isEmpty()) return List.of();
-        return list(
-                currentSession().createQuery(
-                        "from TermAssessment ta where ta.targetUrl in (:urls)",
-                        TermAssessment.class
-                ).setParameterList("urls", urls)
-        );
-    }
-
-    /**
-     * Substring/contains match on target_url (case-sensitive depending on DB collation)
-     */
-    public List<TermAssessment> findByTargetUrlContaining(String fragment) {
-        if (fragment == null || fragment.isEmpty()) return List.of();
-
-        // Escape LIKE wildcards
-        String escaped = fragment
-                .replace("\\", "\\\\")
-                .replace("%", "\\%")
-                .replace("_", "\\_");
-
-        return list(
-                currentSession().createQuery(
-                        "from TermAssessment ta " +
-                                "where ta.targetUrl like :pattern escape '\\'",
-                        TermAssessment.class
-                ).setParameter("pattern", "%" + escaped + "%")
+                currentSession()
+                        .createQuery(
+                                "select ta " +
+                                        "from TermAssessment ta " +
+                                        "where ta.targetUrl = :url " +
+                                        "  and ta.assessment.termList.department.id = :deptId " +
+                                        "  and ta.assessment.termList.language.id = :langId",
+                                TermAssessment.class
+                        )
+                        .setParameter("url", url)
+                        .setParameter("deptId", departmentId)
+                        .setParameter("langId", languageId)
         );
     }
 

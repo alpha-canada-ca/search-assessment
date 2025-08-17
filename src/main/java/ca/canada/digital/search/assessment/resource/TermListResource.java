@@ -84,8 +84,9 @@ public class TermListResource {
     @UnitOfWork
     @Path("/department/{deptId}")
     public Response byDepartment(@Auth UserEntity user,
-                                 @PathParam("deptId") Integer deptId) {
-        List<TermList> lists = service.listByDepartment(user, deptId);
+                                 @PathParam("deptId") Integer deptId,
+                                 @QueryParam("langId") Integer langId) {
+        List<TermList> lists = service.listByDepartment(user, deptId, langId);
         return Response.ok(lists).build();
     }
 

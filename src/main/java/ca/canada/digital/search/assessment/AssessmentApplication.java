@@ -88,12 +88,13 @@ public class AssessmentApplication extends Application<AssessmentConfiguration> 
         final UserSessionDao sessionDao = new UserSessionDao(hibernate.getSessionFactory());
 
         // API Services
-        final AssessmentService assessmentService = new AssessmentService(assessmentDao, termListDao, config);
+        final AssessmentService assessmentService = new AssessmentService(assessmentDao, termListDao, langDao, config);
         final AuthService authService = new AuthService(userDao, sessionDao);
         final DepartmentService deptService = new DepartmentService(departmentDao, userDao);
-        final TermAssessmentService termAssessmentService = new TermAssessmentService(termAssessmentDao);
+        final TermAssessmentService termAssessmentService = new TermAssessmentService(termAssessmentDao, langDao);
         final TermListService termService = new TermListService(termListDao, termDao, langDao, userDao, targetUrlDao);
         final UserService userService = new UserService(userDao, departmentDao);
+        final LanguageService languageService = new LanguageService(langDao);
 
         final ThreadPoolExecutor threadPool = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>());
@@ -167,6 +168,7 @@ public class AssessmentApplication extends Application<AssessmentConfiguration> 
         environment.jersey().register(new DepartmentResource(deptService));
         environment.jersey().register(new TermListResource(termService));
         environment.jersey().register(new UserResource(userDao, tokenDao, userService));
+        environment.jersey().register(new LanguageResource(languageService));
 
         environment.jersey().register(new DatabaseConstraintViolationMapper());
 

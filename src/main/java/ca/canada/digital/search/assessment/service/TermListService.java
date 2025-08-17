@@ -178,12 +178,17 @@ public class TermListService {
      * Only admins or same-department can view lists for a department
      */
     public List<TermList> listByDepartment(UserEntity requester,
-                                           Integer departmentId) {
-        if (!requester.isAdmin()
+                                           Integer departmentId,
+                                           Integer languageId) {
+
+        UserEntity user = userDao.findById(requester.getId())
+                .orElseThrow(() -> new NotFoundException("User not found: " + requester.getId()));
+
+        if (!user.isAdmin()
                 && !requester.getDepartment().getId().equals(departmentId)) {
             throw new ForbiddenException("Not allowed to view lists for department " + departmentId);
         }
-        return termListDao.findByDepartment(departmentId);
+        return termListDao.findByDepartment(departmentId, languageId);
     }
 
     /**

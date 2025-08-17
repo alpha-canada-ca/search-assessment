@@ -10,6 +10,9 @@ public class UrlAssessmentResponse {
     String internalSpecificScore;
     String internalScore;
     String googleScore;
+    int internalSpecificPasses;
+    int internalPasses;
+    int googlePasses;
     List<TermAssessment> internalSpecificTerms;
     List<TermAssessment> internalTerms;
     List<TermAssessment> googleTerms;
@@ -45,6 +48,30 @@ public class UrlAssessmentResponse {
 
     public void setGoogleScore(String googleScore) {
         this.googleScore = googleScore;
+    }
+
+    public int getInternalSpecificPasses() {
+        return internalSpecificPasses;
+    }
+
+    public void setInternalSpecificPasses(int internalSpecificPasses) {
+        this.internalSpecificPasses = internalSpecificPasses;
+    }
+
+    public int getInternalPasses() {
+        return internalPasses;
+    }
+
+    public void setInternalPasses(int internalPasses) {
+        this.internalPasses = internalPasses;
+    }
+
+    public int getGooglePasses() {
+        return googlePasses;
+    }
+
+    public void setGooglePasses(int googlePasses) {
+        this.googlePasses = googlePasses;
     }
 
     public List<TermAssessment> getInternalSpecificTerms() {

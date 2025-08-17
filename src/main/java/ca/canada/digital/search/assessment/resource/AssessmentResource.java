@@ -6,7 +6,6 @@ import ca.canada.digital.search.assessment.api.UrlAssessmentResponse;
 import ca.canada.digital.search.assessment.model.Assessment;
 import ca.canada.digital.search.assessment.model.UserEntity;
 import ca.canada.digital.search.assessment.object.Format;
-import ca.canada.digital.search.assessment.object.Language;
 import ca.canada.digital.search.assessment.process.CsvProcess;
 import ca.canada.digital.search.assessment.service.*;
 import ca.canada.digital.search.assessment.util.ResponseUtil;
@@ -21,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -114,6 +114,15 @@ public class AssessmentResource {
         return ResponseUtil.errorResponse("Something went wrong while processing the data.");
     }
 
+    @GET
+    @UnitOfWork
+    @Path("/department/{deptId}")
+    public Response byDepartment(@PathParam("deptId") Integer deptId,
+                                 @QueryParam("langId") Integer langId) {
+        List<Assessment> lists = assessmentService.listByDepartment(deptId, langId);
+        return Response.ok(lists).build();
+    }
+
     /**
      * Delete – requester must be an admin or the owner of the list.
      */
@@ -138,9 +147,9 @@ public class AssessmentResource {
     @GET
     @Path("/url")
     @UnitOfWork
-    public Response getAssessment(@QueryParam("url") String url, @QueryParam("lang") @DefaultValue("en") String lang) {
-        Language language = Language.FRENCH.getCode().equalsIgnoreCase(lang) ? Language.FRENCH : Language.ENGLISH;
-        UrlAssessmentResponse urlAssessmentResponse = termAssessmentService.getUrlAssessmentResponse(url, language);
+    public Response getAssessment(@QueryParam("url") String url,  @QueryParam("deptId") Integer deptId,
+                                  @QueryParam("langId") Integer langId) {
+        UrlAssessmentResponse urlAssessmentResponse = termAssessmentService.getUrlAssessmentResponse(url, deptId, langId);
         return Response.ok(urlAssessmentResponse).build();
     }
 

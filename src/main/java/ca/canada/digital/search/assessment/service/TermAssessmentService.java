@@ -1,31 +1,36 @@
 package ca.canada.digital.search.assessment.service;
 
 import ca.canada.digital.search.assessment.api.UrlAssessmentResponse;
+import ca.canada.digital.search.assessment.dao.LanguageDao;
 import ca.canada.digital.search.assessment.dao.TermAssessmentDao;
+import ca.canada.digital.search.assessment.model.Department;
+import ca.canada.digital.search.assessment.model.Language;
 import ca.canada.digital.search.assessment.model.TermAssessment;
-import ca.canada.digital.search.assessment.object.Language;
 import ca.canada.digital.search.assessment.object.MetadataHighlight;
 import ca.canada.digital.search.assessment.process.LanguageProcess;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TermAssessmentService {
 
-    private TermAssessmentDao termAssessmentDao;
+    private final TermAssessmentDao termAssessmentDao;
+    private final LanguageDao languageDao;
 
-    public TermAssessmentService(TermAssessmentDao termAssessmentDao) {
+    public TermAssessmentService(TermAssessmentDao termAssessmentDao, LanguageDao languageDao) {
         this.termAssessmentDao = termAssessmentDao;
+        this.languageDao = languageDao;
     }
 
-    public List<TermAssessment> getTermAssessmentsByUrl(String targetUrl) {
-        return termAssessmentDao.findByTargetUrl(targetUrl);
+    public List<TermAssessment> getTermAssessmentsByUrl(String targetUrl, Integer deptId, Integer langId) {
+        return termAssessmentDao.findByTargetUrl(targetUrl, deptId, langId);
     }
 
-    public UrlAssessmentResponse getUrlAssessmentResponse(String url, Language lang) {
-        List<TermAssessment> termAssessments = getTermAssessmentsByUrl(url);
+    public UrlAssessmentResponse getUrlAssessmentResponse(String url, Integer deptId, Integer langId) {
+        List<TermAssessment> termAssessments = getTermAssessmentsByUrl(url, deptId, langId);
 
         long internalCount = termAssessments.stream()
                 .filter(term -> term.getSearchType() == TermAssessment.SearchType.INTERNAL)
@@ -61,18 +66,21 @@ public class TermAssessmentService {
         UrlAssessmentResponse urlAssessmentResponse = new UrlAssessmentResponse();
         urlAssessmentResponse.setUrl(url);
         if (internalCount > 0) {
+            urlAssessmentResponse.setInternalPasses((int) internalPasses);
             urlAssessmentResponse.setInternalScore(internalPasses > 0 ? String.format("%.2f%%", (float) (internalPasses / internalCount) * 100) : "0%");
             urlAssessmentResponse.setInternalTerms(internalTerms);
 
             LanguageProcess lp;
+            Optional<Language> language = languageDao.findById(langId);
             List<MetadataHighlight> metadataHighlights = new ArrayList<>();
             for (TermAssessment term : internalTerms) {
-                lp = new LanguageProcess(term.getTerm(), lang);
+                lp = new LanguageProcess(term.getTerm(), language.get());
                 metadataHighlights.add(lp.getHighlightedMetadata(term.getMetadata()));
             }
             urlAssessmentResponse.setHighlightedMetadata(metadataHighlights);
         }
         if (internalSpecificCount > 0) {
+            urlAssessmentResponse.setInternalSpecificPasses((int) internalSpecificPasses);
             urlAssessmentResponse.setInternalSpecificScore(internalSpecificPasses > 0 ? String.format("%.2f%%", (float) (internalSpecificPasses / internalSpecificCount) * 100) : "0%");
             urlAssessmentResponse.setInternalSpecificTerms(termAssessments.stream()
                     .filter(term -> term.getSearchType() == TermAssessment.SearchType.INTERNAL_SPECIFIC)
@@ -85,6 +93,7 @@ public class TermAssessmentService {
                     .collect(Collectors.toList()));
         }
         if (googleCount > 0) {
+            urlAssessmentResponse.setGooglePasses((int) googlePasses);
             urlAssessmentResponse.setGoogleScore(googlePasses > 0 ? String.format("%.2f%%", (float) (googlePasses / googleCount) * 100) : "0%");
             urlAssessmentResponse.setGoogleTerms(termAssessments.stream()
                     .filter(term -> term.getSearchType() == TermAssessment.SearchType.GOOGLE)

@@ -26,7 +26,7 @@ public class Assessment implements Serializable {
     @Column(nullable = false)
     private LocalDateTime date;
 
-    @OneToMany(mappedBy = "assessment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "assessment", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TermAssessment> termAssessments = new ArrayList<>();
 
     public Integer getId() {

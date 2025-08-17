@@ -2,7 +2,7 @@ package ca.canada.digital.search.assessment.process;
 
 import ca.canada.digital.search.assessment.model.Metadata;
 import ca.canada.digital.search.assessment.object.Highlight;
-import ca.canada.digital.search.assessment.object.Language;
+import ca.canada.digital.search.assessment.model.Language;
 import ca.canada.digital.search.assessment.object.MetadataHighlight;
 import ca.canada.digital.search.assessment.util.DateUtil;
 import org.apache.commons.lang3.StringUtils;

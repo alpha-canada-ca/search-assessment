@@ -38,12 +38,12 @@ public class CsvProcess {
                     .build();
             CSVPrinter printer = csvFormat.print(writer);
 
-            int order = 0;
 
             if (assessment != null && !assessment.getTermAssessments().isEmpty()) {
                 for (TermAssessment.SearchType searchType : TermAssessment.SearchType.values()) {
+                    int sequence = 0;
                     for (TermAssessment ta : assessment.getTermAssessments()) {
-                        order++;
+                        sequence++;
                         String searchTerms = ta.getTerm();
                         boolean isPass = ta.getPass();
                         String targetUrl = ta.getTargetUrl();
@@ -56,7 +56,7 @@ public class CsvProcess {
                         String lastUpdate = DateUtil.dateToString(ta.getMetadata().getLastUpdate());
                         int position = ta.getPosition();
 
-                        printer.printRecord(order, searchTerms, isPass ? "Pass" : "Fail", targetUrl, title,
+                        printer.printRecord(sequence, searchTerms, isPass ? "Pass" : "Fail", targetUrl, title,
                                 descriptions, h1, lastUpdate, position, type);
 
                     }

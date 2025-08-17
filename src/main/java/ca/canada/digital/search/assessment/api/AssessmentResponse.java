@@ -7,19 +7,32 @@ import ca.canada.digital.search.assessment.object.MetadataHighlight;
 import java.util.List;
 
 public class AssessmentResponse {
+    Integer id;
     TermList list;
     String name;
     String date;
     boolean hasSpecificSearch;
     String internalSpecificScore;
     String internalScore;
-    String internalUrl;
     String googleScore;
+    int internalSpecificPasses;
+    int internalPasses;
+    int googlePasses;
+    String internalSpecificUrl;
+    String internalUrl;
     String googleUrl;
     List<TermAssessment> internalSpecificTerms;
     List<TermAssessment> internalTerms;
     List<TermAssessment> googleTerms;
     List<MetadataHighlight> highlightedMetadata;
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public TermList getList() {
         return list;
@@ -69,20 +82,52 @@ public class AssessmentResponse {
         this.internalScore = internalScore;
     }
 
-    public String getInternalUrl() {
-        return internalUrl;
-    }
-
-    public void setInternalUrl(String internalUrl) {
-        this.internalUrl = internalUrl;
-    }
-
     public String getGoogleScore() {
         return googleScore;
     }
 
     public void setGoogleScore(String googleScore) {
         this.googleScore = googleScore;
+    }
+
+    public int getInternalSpecificPasses() {
+        return internalSpecificPasses;
+    }
+
+    public void setInternalSpecificPasses(int internalSpecificPasses) {
+        this.internalSpecificPasses = internalSpecificPasses;
+    }
+
+    public int getInternalPasses() {
+        return internalPasses;
+    }
+
+    public void setInternalPasses(int internalPasses) {
+        this.internalPasses = internalPasses;
+    }
+
+    public int getGooglePasses() {
+        return googlePasses;
+    }
+
+    public void setGooglePasses(int googlePasses) {
+        this.googlePasses = googlePasses;
+    }
+
+    public String getInternalSpecificUrl() {
+        return internalSpecificUrl;
+    }
+
+    public void setInternalSpecificUrl(String internalSpecificUrl) {
+        this.internalSpecificUrl = internalSpecificUrl;
+    }
+
+    public String getInternalUrl() {
+        return internalUrl;
+    }
+
+    public void setInternalUrl(String internalUrl) {
+        this.internalUrl = internalUrl;
     }
 
     public String getGoogleUrl() {
